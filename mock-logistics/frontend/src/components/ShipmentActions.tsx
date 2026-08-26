@@ -11,7 +11,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
-import type { Shipment } from "@/lib/mock-backend";
+import type { Shipment } from "@/lib/types";
 import { useMarkDelivered, useMarkTransit, useReportDamage } from "@/lib/queries";
 import { PackageCheck, ScanLine, TriangleAlert } from "lucide-react";
 
@@ -37,34 +37,17 @@ export function ShipmentActions({
   const damage = useReportDamage();
 
   const busy = transit.isPending || deliver.isPending || damage.isPending;
-  const delivered = shipment.status === "DELIVERED";
+  const isTerminal = shipment.carrier_status === "DELIVERED" || shipment.carrier_status === "DAMAGED";
 
   return (
     <div className="flex flex-wrap gap-2">
-      {shipment.status === "CREATED" ? (
-        <Button
-          size={size}
-          variant="secondary"
-          disabled={busy}
-          onClick={() =>
-            transit.mutate(shipment.tracking_id, {
-              onSuccess: () =>
-                toast.success("Shipment scanned", { description: "IN TRANSIT · INTACT" }),
-              onError: failToast,
-            })
-          }
-        >
-          <ScanLine className="size-3.5" /> Scan into Transit
-        </Button>
-      ) : null}
-
-      <Button size={size} disabled={busy || delivered} onClick={() => setDeliverOpen(true)}>
+      <Button size={size} disabled={busy || isTerminal} onClick={() => setDeliverOpen(true)}>
         <PackageCheck className="size-3.5" /> Mark Delivered
       </Button>
       <Button
         size={size}
         variant="outline"
-        disabled={busy || shipment.condition === "DAMAGED"}
+        disabled={busy || isTerminal}
         onClick={() => setDamageOpen(true)}
       >
         <TriangleAlert className="size-3.5" /> Report Damage
@@ -80,7 +63,7 @@ export function ShipmentActions({
           </DialogHeader>
           <div className="panel space-y-1 p-3 font-mono text-sm">
             <div className="text-primary">{shipment.tracking_id}</div>
-            <div className="text-muted-foreground">{shipment.order_id}</div>
+            <div className="text-muted-foreground">{shipment.omnitrust_order_id}</div>
             <div className="text-muted-foreground">{shipment.item_count} items</div>
           </div>
           <DialogFooter>
@@ -91,13 +74,10 @@ export function ShipmentActions({
               disabled={deliver.isPending}
               onClick={() =>
                 deliver.mutate(shipment.tracking_id, {
-                  onSuccess: (res) => {
+                  onSuccess: () => {
                     setDeliverOpen(false);
                     toast.success("DELIVERED", {
-                      description:
-                        res.webhook.status === "SENT"
-                          ? "Webhook accepted by OmniTrust — HTTP 200"
-                          : "Webhook delivery failed — retrying",
+                      description: "Shipment marked as delivered. Webhook dispatched to OmniTrust.",
                     });
                   },
                   onError: failToast,

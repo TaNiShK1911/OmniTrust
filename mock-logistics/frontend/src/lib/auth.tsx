@@ -15,6 +15,7 @@ export const DEMO_CREDENTIALS = {
 };
 
 const STORAGE_KEY = "omnilogistics.session";
+// Remove plain-text password storage
 const USERS_KEY = "omnilogistics.users";
 
 type AuthContextValue = {
@@ -28,7 +29,7 @@ type AuthContextValue = {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
-type StoredUser = { name: string; email: string; password: string };
+type StoredUser = { name: string; email: string };
 
 function readUsers(): StoredUser[] {
   if (typeof window === "undefined") return [];
@@ -79,9 +80,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           role: DEMO_CREDENTIALS.role,
         });
       }
-      const match = readUsers().find(
-        (u) => u.email === normalized && u.password === password,
-      );
+      const match = readUsers().find((u) => u.email === normalized);
       if (!match) throw new Error("Invalid credentials. Try the demo account.");
       return persist({ email: match.email, name: match.name, role: "Supervisor" });
     },
@@ -89,14 +88,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 
   const signUp = useCallback(
-    async (name: string, email: string, password: string) => {
+    async (name: string, email: string, _password: string) => {
       await delay(550);
       const normalized = email.trim().toLowerCase();
       const users = readUsers();
       if (normalized === DEMO_CREDENTIALS.email || users.some((u) => u.email === normalized)) {
         throw new Error("An operator with that email already exists.");
       }
-      users.push({ name: name.trim(), email: normalized, password });
+      users.push({ name: name.trim(), email: normalized });
       writeUsers(users);
       return persist({ email: normalized, name: name.trim(), role: "Supervisor" });
     },

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { webhookEventsQuery, useRetryWebhook } from "@/lib/queries";
-import type { WebhookEvent } from "@/lib/mock-backend";
+import type { WebhookEvent } from "@/lib/types";
 import { clockTime, fullTime } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -10,9 +10,23 @@ import { StatusBadge } from "./StatusBadge";
 import { toast } from "sonner";
 
 function codeClass(w: WebhookEvent) {
-  if (w.status === "FAILED") return "text-destructive";
-  if (w.status === "RETRYING") return "text-warning";
+  if (w.delivery_status === "FAILED") return "text-destructive";
+  if (w.delivery_status === "PENDING") return "text-warning";
   return "text-success";
+}
+
+function httpLabel(w: WebhookEvent): string {
+  if (w.response_code) return `HTTP ${w.response_code}`;
+  if (w.last_error) return w.last_error.slice(0, 30);
+  return w.delivery_status;
+}
+
+function parsePayload(raw: string): Record<string, unknown> {
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return { raw };
+  }
 }
 
 export function WebhookTerminal({
@@ -51,12 +65,10 @@ export function WebhookTerminal({
               className="flex w-full items-center gap-3 rounded-sm px-2 py-1 text-left hover:bg-primary/10"
             >
               <span className="text-muted-foreground">{clockTime(w.created_at)}</span>
-              <span className="text-terminal-foreground">{w.event}</span>
+              <span className="text-terminal-foreground">{w.event_type}</span>
               <span className="truncate text-muted-foreground">{w.tracking_id}</span>
               <span className={cn("ml-auto", codeClass(w))}>
-                {w.status === "RETRYING"
-                  ? `RETRY ${w.attempt}/${w.max_attempts}`
-                  : (w.http_status ?? w.http_text)}
+                {httpLabel(w)}
               </span>
             </button>
           ))
@@ -68,15 +80,15 @@ export function WebhookTerminal({
           {selected ? (
             <>
               <SheetHeader>
-                <SheetTitle className="font-mono text-sm">{selected.event}</SheetTitle>
+                <SheetTitle className="font-mono text-sm">{selected.event_type}</SheetTitle>
               </SheetHeader>
               <div className="space-y-4 px-4 pb-6 font-mono text-xs">
                 <dl className="space-y-2">
                   {[
-                    ["Event", selected.event],
+                    ["Event", selected.event_type],
                     ["Tracking", selected.tracking_id],
-                    ["HTTP", selected.http_status ? selected.http_text : selected.http_text],
-                    ["Attempt", `${selected.attempt} / ${selected.max_attempts}`],
+                    ["HTTP", selected.response_code ? `HTTP ${selected.response_code}` : "—"],
+                    ["Attempts", `${selected.attempt_count} / 3`],
                     ["Signature", selected.signature],
                     ["Timestamp", fullTime(selected.created_at)],
                   ].map(([k, v]) => (
@@ -88,24 +100,19 @@ export function WebhookTerminal({
                   <div className="flex justify-between gap-4 pt-1">
                     <dt className="text-muted-foreground uppercase">Status</dt>
                     <dd>
-                      <StatusBadge value={selected.status} />
+                      <StatusBadge value={selected.delivery_status} />
                     </dd>
                   </div>
                 </dl>
 
-                {selected.status === "RETRYING" ? (
-                  <div className="rounded-sm border border-warning/40 bg-warning/10 p-3 text-warning">
-                    WEBHOOK DELIVERY FAILED
-                    <br />
-                    Attempt {selected.attempt}/{selected.max_attempts} — {selected.http_text}
-                    <br />
-                    Retrying…
+                {selected.last_error ? (
+                  <div className="rounded-sm border border-destructive/40 bg-destructive/10 p-3 text-destructive">
+                    {selected.last_error}
                   </div>
                 ) : null}
 
-                {selected.status === "FAILED" ? (
-                  <div className="space-y-2 rounded-sm border border-destructive/40 bg-destructive/10 p-3 text-destructive">
-                    <div>WEBHOOK DELIVERY FAILED — {selected.max_attempts} attempts exhausted.</div>
+                {selected.delivery_status === "FAILED" ? (
+                  <div className="space-y-2">
                     <Button
                       size="sm"
                       variant="outline"
@@ -114,7 +121,11 @@ export function WebhookTerminal({
                         retry.mutate(selected.id, {
                           onSuccess: (w) => {
                             setSelected(w);
-                            toast.success("Webhook re-delivered", { description: "HTTP 200 OK" });
+                            if (w.delivery_status === "SENT") {
+                              toast.success("Webhook re-delivered", { description: `HTTP ${w.response_code}` });
+                            } else {
+                              toast.error("Retry failed", { description: w.last_error ?? "Unknown error" });
+                            }
                           },
                           onError: () => toast.error("Retry failed."),
                         })
@@ -128,7 +139,7 @@ export function WebhookTerminal({
                 <div>
                   <div className="label-xs mb-1">Payload</div>
                   <pre className="overflow-x-auto rounded-sm bg-terminal p-3 text-terminal-foreground">
-                    {JSON.stringify(selected.payload, null, 2)}
+                    {JSON.stringify(parsePayload(selected.payload), null, 2)}
                   </pre>
                 </div>
                 <p className="text-[10px] text-muted-foreground">

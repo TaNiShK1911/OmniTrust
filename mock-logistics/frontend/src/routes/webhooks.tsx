@@ -29,9 +29,9 @@ function WebhooksPage() {
   const { data } = useQuery(webhookEventsQuery);
   const all = data ?? [];
   const counts = {
-    sent: all.filter((w) => w.status === "SENT").length,
-    retrying: all.filter((w) => w.status === "RETRYING").length,
-    failed: all.filter((w) => w.status === "FAILED").length,
+    sent: all.filter((w) => w.delivery_status === "SENT").length,
+    retrying: all.filter((w) => w.delivery_status === "PENDING").length,
+    failed: all.filter((w) => w.delivery_status === "FAILED").length,
   };
 
   return (
@@ -43,7 +43,7 @@ function WebhooksPage() {
           <div className="mt-2 font-mono text-2xl text-success">{counts.sent}</div>
         </div>
         <div className="panel p-4">
-          <div className="label-xs">Retrying</div>
+          <div className="label-xs">Pending / Retrying</div>
           <div className="mt-2 font-mono text-2xl text-warning">{counts.retrying}</div>
         </div>
         <div className="panel p-4">

@@ -11,10 +11,12 @@ class WebhookEvent(Base):
     event_type = Column(String, nullable=False)
     payload = Column(String, nullable=False) # JSON text
     signature = Column(String, nullable=False)
+    idempotency_key = Column(String, unique=True, nullable=True, index=True)
     
     attempt_count = Column(Integer, default=0)
     delivery_status = Column(String, default="PENDING") # PENDING, SENT, FAILED
     response_code = Column(Integer, nullable=True)
+    last_error = Column(String, nullable=True)
     
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     delivered_at = Column(DateTime, nullable=True)

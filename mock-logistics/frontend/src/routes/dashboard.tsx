@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { shipmentsQuery, statsQuery } from "@/lib/queries";
+import { shipmentsQuery, webhookEventsQuery } from "@/lib/queries";
 import { WarehouseLayout } from "@/components/WarehouseLayout";
 import { ShipmentCard } from "@/components/ShipmentCard";
 import { WebhookTerminal } from "@/components/WebhookTerminal";
@@ -36,19 +36,32 @@ function Kpi({ label, value, tone }: { label: string; value: string | number; to
 }
 
 function Dashboard() {
-  const stats = useQuery(statsQuery);
   const shipments = useQuery(shipmentsQuery);
-  const active = (shipments.data ?? []).filter((s) => s.status !== "DELIVERED");
+  const webhooks = useQuery(webhookEventsQuery);
+  
+  const active = (shipments.data ?? []).filter((s) => s.carrier_status !== "DELIVERED");
+  
+  // Compute KPIs
+  const allShipments = shipments.data ?? [];
+  const inTransit = allShipments.filter(s => s.carrier_status === "IN_TRANSIT").length;
+  const delivered = allShipments.filter(s => s.carrier_status === "DELIVERED").length;
+  const damaged = allShipments.filter(s => s.carrier_status === "DAMAGED").length;
+  
+  const allWebhooks = webhooks.data ?? [];
+  const sentWebhooks = allWebhooks.filter(w => w.delivery_status === "SENT").length;
+  const webhookSuccessRate = allWebhooks.length > 0 
+    ? Math.round((sentWebhooks / allWebhooks.length) * 100) 
+    : 100;
 
   return (
     <WarehouseLayout>
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <Kpi label="In Transit" value={stats.data?.in_transit ?? "—"} tone="text-info" />
-        <Kpi label="Delivered" value={stats.data?.delivered ?? "—"} tone="text-success" />
-        <Kpi label="Damaged" value={stats.data?.damaged ?? "—"} tone="text-warning" />
+        <Kpi label="In Transit" value={shipments.isSuccess ? inTransit : "—"} tone="text-info" />
+        <Kpi label="Delivered" value={shipments.isSuccess ? delivered : "—"} tone="text-success" />
+        <Kpi label="Damaged" value={shipments.isSuccess ? damaged : "—"} tone="text-warning" />
         <Kpi
           label="Webhook Success"
-          value={stats.data ? `${stats.data.webhook_success_rate}%` : "—"}
+          value={webhooks.isSuccess ? `${webhookSuccessRate}%` : "—"}
           tone="text-primary"
         />
       </div>

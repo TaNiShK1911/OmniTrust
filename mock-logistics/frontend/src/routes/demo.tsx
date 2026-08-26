@@ -12,12 +12,10 @@ import {
 } from "@/components/ui/select";
 import {
   shipmentsQuery,
-  useCreateSampleShipment,
+  useCreateShipment,
   useMarkDelivered,
   useReportDamage,
   useResetShipment,
-  useToggleService,
-  healthQuery,
 } from "@/lib/queries";
 import { toast } from "sonner";
 
@@ -28,7 +26,7 @@ export const Route = createFileRoute("/demo")({
       {
         name: "description",
         content:
-          "Demo-only helpers to seed shipments, trigger delivery and damage events, reset state, and simulate a Mock Logistics API outage.",
+          "Demo-only helpers to seed shipments, trigger delivery and damage events, and reset state.",
       },
       { property: "og:title", content: "Demo Controls — OmniLogistics Mock 3PL" },
       {
@@ -44,14 +42,12 @@ export const Route = createFileRoute("/demo")({
 
 function DemoPage() {
   const { data: shipments } = useQuery(shipmentsQuery);
-  const health = useQuery(healthQuery);
   const [target, setTarget] = useState<string>("");
 
-  const create = useCreateSampleShipment();
+  const create = useCreateShipment();
   const reset = useResetShipment();
   const deliver = useMarkDelivered();
   const damage = useReportDamage();
-  const toggle = useToggleService();
 
   const selected = target || shipments?.[0]?.tracking_id || "";
   const fail = (e: unknown) =>
@@ -72,12 +68,12 @@ function DemoPage() {
         <div className="panel space-y-3 p-5">
           <h2 className="label-xs">Seed</h2>
           <p className="font-mono text-xs text-muted-foreground">
-            Creates a new CREATED shipment and emits a CREATE_SHIPMENT webhook.
+            Creates a new shipment by simulating a warehouse fulfillment request.
           </p>
           <Button
             disabled={create.isPending}
             onClick={() =>
-              create.mutate(undefined, {
+              create.mutate({ orderId: `DEMO-${Date.now().toString().slice(-6)}`, itemCount: 1 }, {
                 onSuccess: (s) => toast.success("Shipment created", { description: s.tracking_id }),
                 onError: fail,
               })
@@ -96,7 +92,7 @@ function DemoPage() {
             <SelectContent>
               {(shipments ?? []).map((s) => (
                 <SelectItem key={s.tracking_id} value={s.tracking_id} className="font-mono text-xs">
-                  {s.tracking_id} · {s.status}
+                  {s.tracking_id} · {s.carrier_status}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -133,7 +129,7 @@ function DemoPage() {
               disabled={!selected || reset.isPending}
               onClick={() =>
                 reset.mutate(selected, {
-                  onSuccess: () => toast.success("Shipment reset to CREATED"),
+                  onSuccess: () => toast.success("Shipment reset to IN_TRANSIT"),
                   onError: fail,
                 })
               }
@@ -141,20 +137,6 @@ function DemoPage() {
               Reset Shipment
             </Button>
           </div>
-        </div>
-
-        <div className="panel space-y-3 p-5 lg:col-span-2">
-          <h2 className="label-xs">Service Simulation</h2>
-          <p className="font-mono text-xs text-muted-foreground">
-            Take the Mock Logistics API offline to exercise the unavailable-service states.
-          </p>
-          <Button
-            variant={health.isSuccess ? "destructive" : "default"}
-            disabled={toggle.isPending}
-            onClick={() => toggle.mutate(!health.isSuccess)}
-          >
-            {health.isSuccess ? "Simulate API Outage" : "Restore API"}
-          </Button>
         </div>
       </div>
     </WarehouseLayout>

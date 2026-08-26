@@ -48,9 +48,9 @@ function ShipmentsPage() {
       (s) =>
         (term === "" ||
           s.tracking_id.toLowerCase().includes(term) ||
-          s.order_id.toLowerCase().includes(term)) &&
-        (status === "ALL" || s.status === status) &&
-        (condition === "ALL" || s.condition === condition),
+          s.omnitrust_order_id.toLowerCase().includes(term)) &&
+        (status === "ALL" || s.carrier_status === status) &&
+        (condition === "ALL" || s.goods_condition === condition),
     );
   }, [data, q, status, condition]);
 
@@ -70,7 +70,7 @@ function ShipmentsPage() {
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            {["ALL", "CREATED", "IN_TRANSIT", "DELIVERED"].map((v) => (
+            {["ALL", "IN_TRANSIT", "DELIVERED", "DAMAGED"].map((v) => (
               <SelectItem key={v} value={v} className="font-mono text-xs">
                 {v}
               </SelectItem>
@@ -142,13 +142,13 @@ function ShipmentsPage() {
                       {s.tracking_id}
                     </Link>
                   </td>
-                  <td className="px-3 py-2 font-mono text-xs">{s.order_id}</td>
+                  <td className="px-3 py-2 font-mono text-xs">{s.omnitrust_order_id}</td>
                   <td className="px-3 py-2 font-mono text-xs">{s.item_count}</td>
                   <td className="px-3 py-2">
-                    <StatusBadge value={s.status} />
+                    <StatusBadge value={s.carrier_status} />
                   </td>
                   <td className="px-3 py-2">
-                    <StatusBadge value={s.condition} />
+                    <StatusBadge value={s.goods_condition} />
                   </td>
                   <td className="px-3 py-2 font-mono text-[11px] text-muted-foreground whitespace-nowrap">
                     {fullTime(s.created_at)}

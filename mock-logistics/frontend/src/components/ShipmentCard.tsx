@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import type { Shipment } from "@/lib/mock-backend";
+import type { Shipment } from "@/lib/types";
 import { StatusBadge } from "./StatusBadge";
 import { ShipmentActions } from "./ShipmentActions";
 import { relTime } from "@/lib/format";
@@ -17,12 +17,12 @@ export function ShipmentCard({ shipment }: { shipment: Shipment }) {
             {shipment.tracking_id}
           </Link>
           <div className="mt-1 font-mono text-xs text-muted-foreground">
-            {shipment.order_id} · {shipment.item_count} items
+            {shipment.omnitrust_order_id} · {shipment.item_count} items
           </div>
         </div>
         <div className="flex flex-col items-end gap-1.5">
-          <StatusBadge value={shipment.status} />
-          <StatusBadge value={shipment.condition} />
+          <StatusBadge value={shipment.carrier_status} />
+          <StatusBadge value={shipment.goods_condition} />
         </div>
       </div>
 

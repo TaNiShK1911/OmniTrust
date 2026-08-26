@@ -13,7 +13,7 @@ const toneClass: Record<Tone, string> = {
 export function toneFor(value: string): Tone {
   switch (value) {
     case "IN_TRANSIT":
-    case "RETRYING":
+    case "PENDING":
       return "info";
     case "DELIVERED":
     case "SENT":

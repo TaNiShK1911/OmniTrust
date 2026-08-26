@@ -28,6 +28,14 @@ export const Route = createFileRoute("/shipments/$trackingId")({
   component: ShipmentDetail,
 });
 
+function parsePayload(raw: string): Record<string, unknown> {
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return { raw };
+  }
+}
+
 function ShipmentDetail() {
   const { trackingId } = Route.useParams();
   const shipment = useQuery(shipmentQuery(trackingId));
@@ -56,12 +64,12 @@ function ShipmentDetail() {
                 <div>
                   <h1 className="font-mono text-xl text-primary">{shipment.data.tracking_id}</h1>
                   <p className="mt-1 font-mono text-xs text-muted-foreground">
-                    {shipment.data.order_id} · {shipment.data.item_count} items
+                    {shipment.data.omnitrust_order_id} · {shipment.data.item_count} items
                   </p>
                 </div>
                 <div className="flex gap-2">
-                  <StatusBadge value={shipment.data.status} />
-                  <StatusBadge value={shipment.data.condition} />
+                  <StatusBadge value={shipment.data.carrier_status} />
+                  <StatusBadge value={shipment.data.goods_condition} />
                 </div>
               </div>
 
@@ -74,12 +82,6 @@ function ShipmentDetail() {
                   <dt className="label-xs">Updated</dt>
                   <dd className="mt-1">{fullTime(shipment.data.updated_at)}</dd>
                 </div>
-                {shipment.data.damage_reason ? (
-                  <div className="sm:col-span-2">
-                    <dt className="label-xs">Damage Reason</dt>
-                    <dd className="mt-1 text-warning">{shipment.data.damage_reason}</dd>
-                  </div>
-                ) : null}
               </dl>
 
               <div className="mt-5">
@@ -95,18 +97,23 @@ function ShipmentDetail() {
                 <p className="font-mono text-xs text-muted-foreground">No events recorded.</p>
               ) : (
                 <ol className="space-y-3">
-                  {(events.data ?? []).map((e) => (
-                    <li key={e.id} className="flex gap-3 border-l border-border pl-4">
-                      <span className="-ml-[21px] mt-1.5 h-2 w-2 shrink-0 rounded-full bg-primary" />
-                      <div className="font-mono text-xs">
-                        <div className="text-foreground">{e.type.replace(/_/g, " ")}</div>
-                        <div className="text-muted-foreground">{e.detail}</div>
-                        <div className="text-[10px] text-muted-foreground">
-                          {fullTime(e.created_at)}
+                  {(events.data ?? []).map((e) => {
+                    const payload = parsePayload(e.payload);
+                    return (
+                      <li key={e.id} className="flex gap-3 border-l border-border pl-4">
+                        <span className="-ml-[21px] mt-1.5 h-2 w-2 shrink-0 rounded-full bg-primary" />
+                        <div className="font-mono text-xs">
+                          <div className="text-foreground">{e.event_type.replace(/_/g, " ")}</div>
+                          <div className="text-muted-foreground">
+                            {payload.damage_reason ? `Reason: ${payload.damage_reason}` : "Webhook dispatched"}
+                          </div>
+                          <div className="text-[10px] text-muted-foreground">
+                            {fullTime(e.created_at)}
+                          </div>
                         </div>
-                      </div>
-                    </li>
-                  ))}
+                      </li>
+                    );
+                  })}
                 </ol>
               )}
             </div>

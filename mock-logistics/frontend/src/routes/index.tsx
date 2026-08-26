@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { healthQuery, statsQuery } from "@/lib/queries";
+import { healthQuery, shipmentsQuery } from "@/lib/queries";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth";
 import {
@@ -61,9 +61,14 @@ const features = [
 
 function Landing() {
   const health = useQuery(healthQuery);
-  const stats = useQuery(statsQuery);
+  const shipments = useQuery(shipmentsQuery);
   const { operator } = useAuth();
   const up = health.isSuccess;
+  
+  const allShipments = shipments.data ?? [];
+  const inTransit = allShipments.filter(s => s.carrier_status === "IN_TRANSIT").length;
+  const delivered = allShipments.filter(s => s.carrier_status === "DELIVERED").length;
+  const damaged = allShipments.filter(s => s.carrier_status === "DAMAGED").length;
 
   return (
     <div className="min-h-screen bg-background">
@@ -138,9 +143,9 @@ function Landing() {
             </div>
             <dl className="mt-4 grid grid-cols-3 gap-3">
               {[
-                ["In transit", stats.data?.in_transit],
-                ["Delivered", stats.data?.delivered],
-                ["Damaged", stats.data?.damaged],
+                ["In transit", shipments.isSuccess ? inTransit : "—"],
+                ["Delivered", shipments.isSuccess ? delivered : "—"],
+                ["Damaged", shipments.isSuccess ? damaged : "—"],
               ].map(([label, value]) => (
                 <div key={label as string} className="panel p-3">
                   <dt className="label-xs">{label as string}</dt>

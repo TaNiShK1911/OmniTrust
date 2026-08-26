@@ -1,5 +1,7 @@
 import { queryOptions, useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
-import { api } from "./mock-backend";
+import { api } from "./api";
+
+// ── Query Options ──────────────────────────────────────────────
 
 export const healthQuery = queryOptions({
   queryKey: ["health"],
@@ -15,17 +17,10 @@ export const shipmentsQuery = queryOptions({
   retry: false,
 });
 
-export const statsQuery = queryOptions({
-  queryKey: ["stats"],
-  queryFn: () => api.stats(),
-  refetchInterval: 4000,
-  retry: false,
-});
-
 export const webhookEventsQuery = queryOptions({
   queryKey: ["webhook-events"],
   queryFn: () => api.listWebhookEvents(),
-  refetchInterval: 1500,
+  refetchInterval: 3000,
   retry: false,
 });
 
@@ -45,6 +40,8 @@ export const shipmentEventsQuery = (trackingId: string) =>
     retry: false,
   });
 
+// ── Hooks ──────────────────────────────────────────────────────
+
 export function useHealth() {
   return useQuery(healthQuery);
 }
@@ -56,14 +53,13 @@ function useInvalidateAll() {
     qc.invalidateQueries({ queryKey: ["shipment"] });
     qc.invalidateQueries({ queryKey: ["shipment-events"] });
     qc.invalidateQueries({ queryKey: ["webhook-events"] });
-    qc.invalidateQueries({ queryKey: ["stats"] });
   };
 }
 
 export function useMarkTransit() {
   const invalidate = useInvalidateAll();
   return useMutation({
-    mutationFn: (trackingId: string) => api.transit(trackingId),
+    mutationFn: (trackingId: string) => api.markTransit(trackingId),
     onSuccess: invalidate,
   });
 }
@@ -71,7 +67,7 @@ export function useMarkTransit() {
 export function useMarkDelivered() {
   const invalidate = useInvalidateAll();
   return useMutation({
-    mutationFn: (trackingId: string) => api.deliver(trackingId),
+    mutationFn: (trackingId: string) => api.markDelivered(trackingId),
     onSuccess: invalidate,
   });
 }
@@ -80,7 +76,7 @@ export function useReportDamage() {
   const invalidate = useInvalidateAll();
   return useMutation({
     mutationFn: (vars: { trackingId: string; reason: string }) =>
-      api.damage(vars.trackingId, vars.reason),
+      api.reportDamage(vars.trackingId, vars.reason),
     onSuccess: invalidate,
   });
 }
@@ -101,22 +97,11 @@ export function useResetShipment() {
   });
 }
 
-export function useCreateSampleShipment() {
+export function useCreateShipment() {
   const invalidate = useInvalidateAll();
   return useMutation({
-    mutationFn: () => api.createSampleShipment(),
+    mutationFn: (vars: { orderId: string; itemCount: number }) =>
+      api.createShipment(vars.orderId, vars.itemCount),
     onSuccess: invalidate,
-  });
-}
-
-export function useToggleService() {
-  const invalidate = useInvalidateAll();
-  const qc = useQueryClient();
-  return useMutation({
-    mutationFn: (up: boolean) => api.setServiceUp(up),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["health"] });
-      invalidate();
-    },
   });
 }
