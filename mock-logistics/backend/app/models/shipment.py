@@ -4,7 +4,7 @@ from sqlalchemy import Column, String, Integer, DateTime
 from app.database import Base
 
 class Shipment(Base):
-    __tablename__ = "shipments"
+    __tablename__ = "mock_logistics_shipments"
 
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     tracking_id = Column(String, unique=True, index=True, nullable=False)

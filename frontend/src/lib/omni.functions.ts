@@ -136,16 +136,6 @@ export const fetchShipment = createServerFn({ method: "POST" })
     return backendFetch("GET", `/api/v1/shipments/${data.tracking}`, getToken());
   });
 
-export const emitLogisticsEvent = createServerFn({ method: "POST" })
-  .middleware([requireSupabaseAuth])
-  .inputValidator(
-    (input: { tracking: string; event: "delivered" | "damaged"; mode: "valid" | "tampered" | "replay" }) => input,
-  )
-  .handler(({ data, context }) => {
-    // Keep in process for the webhook emission trick, it talks to :5001 which then talks to :8000
-    const origin = new URL(getRequest().url).origin;
-    return api.emitLogisticsEvent(context.supabase, context.userId, data, origin);
-  });
 
 export const settleOrder = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])

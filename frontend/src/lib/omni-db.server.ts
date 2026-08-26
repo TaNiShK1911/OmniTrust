@@ -462,69 +462,6 @@ export async function getShipmentByTracking(db: DB, tracking: string) {
   return must(data, "Shipment not found");
 }
 
-/* ------------------------- logistics webhook emitter ------------------------ */
-
-/**
- * Emits a signed logistics event to the public webhook route, exactly like the
- * external 3PL would. `mode` lets the demo show tampering and replay handling.
- */
-export async function emitLogisticsEvent(
-  db: DB,
-  userId: string,
-  input: { tracking: string; event: "delivered" | "damaged"; mode: "valid" | "tampered" | "replay" },
-  origin: string,
-) {
-  const shipment = await getShipmentByTracking(db, input.tracking);
-  const eventId =
-    input.mode === "replay" ? `evt_replay_${input.tracking}` : providerRef("evt");
-  const body = JSON.stringify({
-    event_id: eventId,
-    tracking_id: input.tracking,
-    event: input.event,
-    condition: input.event === "damaged" ? "damaged" : "intact",
-    occurred_at: new Date().toISOString(),
-    user_id: shipment.user_id,
-  });
-  const secret = webhookSecret();
-  const signature =
-    input.mode === "tampered" ? signPayload(body, "wrong-secret-supplied-by-attacker") : signPayload(body, secret);
-
-  const res = await fetch(`${origin}/api/public/webhooks/logistics`, {
-    method: "POST",
-    headers: { "content-type": "application/json", "x-omnitrust-signature": signature },
-    body,
-  });
-  const result = (await res.json().catch(() => ({}))) as {
-    error?: string;
-    duplicate?: boolean;
-    delivered?: boolean;
-    dispute_id?: string | null;
-  };
-
-  if (!res.ok) {
-    await audit(db, {
-      userId,
-      orderId: shipment.order_id,
-      category: "webhook",
-      eventType: "webhook.rejected",
-      actor: "OmniTrust Verifier",
-      entity: input.tracking,
-      status: "failed",
-      requestId: eventId,
-      decision: "SIGNATURE_INVALID",
-      payload: { http_status: res.status, reason: result.error ?? "rejected", financial_action: "none" },
-    });
-  }
-  return {
-    ok: res.ok,
-    status: res.status,
-    error: result.error ?? null,
-    duplicate: result.duplicate ?? false,
-    delivered: result.delivered ?? false,
-    disputeId: result.dispute_id ?? null,
-  };
-}
-
 /* ------------------------- settlement / dispute flow ------------------------ */
 
 export async function settleOrder(db: DB, userId: string, orderId: string) {

@@ -12,9 +12,13 @@ if db_path.startswith("./"):
 if os.path.dirname(db_path):
     os.makedirs(os.path.dirname(db_path), exist_ok=True)
 
+engine_args = {}
+if settings.logistics_db_url.startswith("sqlite"):
+    engine_args["connect_args"] = {"check_same_thread": False}
+
 engine = create_engine(
     settings.logistics_db_url,
-    connect_args={"check_same_thread": False}
+    **engine_args
 )
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
