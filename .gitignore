@@ -1,0 +1,33 @@
+# Environments
+.env
+.env.*
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.venv/
+venv/
+ENV/
+
+# Node
+node_modules/
+dist/
+build/
+.npm
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Agent specific
+.agents/
+*.json
+!package.json
+!package-lock.json
+
+# Scratch
+scratch/
