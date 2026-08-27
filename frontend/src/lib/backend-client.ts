@@ -11,7 +11,7 @@
 import { supabase } from "@/integrations/supabase/client";
 
 const BACKEND_URL =
-  (typeof import.meta !== "undefined" && (import.meta as Record<string, Record<string, string>>).env?.VITE_BACKEND_URL) ||
+  (typeof import.meta !== "undefined" && (import.meta as unknown as Record<string, Record<string, string>>).env?.VITE_BACKEND_URL) ||
   "http://localhost:8000";
 
 export type BackendEnvelope<T = unknown> = {

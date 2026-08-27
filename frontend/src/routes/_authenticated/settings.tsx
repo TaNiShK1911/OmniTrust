@@ -137,7 +137,7 @@ function Settings() {
         <div className="space-y-6">
           <Panel title="Dependency health">
             <div className="space-y-3">
-              {(dependencies.data ?? []).map((d) => (
+              {(dependencies.data?.checks ?? []).map((d: any) => (
                 <div key={d.name} className="flex items-center justify-between gap-3">
                   <LabelValue label={d.name} value={d.detail} />
                   <StatusBadge status={d.ok ? "healthy" : "failed"} tone={d.ok ? "success" : "failed"} />

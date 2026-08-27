@@ -43,7 +43,7 @@ function Negotiate() {
 
   const accept = useMutation({
     mutationFn: () => approve({ data: { id: sessionId } }),
-    onSuccess: (res) => navigate({ to: "/orders/$orderId", params: { orderId: res.orderId } }),
+    onSuccess: (res) => navigate({ to: "/orders/$orderId", params: { orderId: res.order_id } }),
   });
 
   const n = session.data?.negotiation;

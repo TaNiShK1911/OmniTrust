@@ -115,15 +115,17 @@ function AuthPage() {
   async function google() {
     setError(null);
     setBusy(true);
-    const result = await supabase.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin,
+    const result = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: window.location.origin,
+      },
     });
     if (result.error) {
       setError("Google sign-in failed. Try email and password.");
       setBusy(false);
       return;
     }
-    if (result.redirected) return;
     await navigate({ to: dest });
   }
 

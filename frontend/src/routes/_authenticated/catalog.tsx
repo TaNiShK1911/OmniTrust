@@ -35,7 +35,7 @@ function Catalog() {
   const mutation = useMutation({
     mutationFn: (productId: string) =>
       start({ data: { productId, quantity, targetDiscountPct: discount } }),
-    onSuccess: (res) => navigate({ to: "/negotiate/$sessionId", params: { sessionId: res.negotiation.id } }),
+    onSuccess: (res) => navigate({ to: "/negotiate/$sessionId", params: { sessionId: res.id } }),
   });
 
   return (

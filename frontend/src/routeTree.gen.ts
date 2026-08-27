@@ -24,7 +24,6 @@ import { Route as AuthenticatedOrdersIndexRouteImport } from './routes/_authenti
 import { Route as AuthenticatedShipmentsTrackingIdRouteImport } from './routes/_authenticated/shipments/$trackingId'
 import { Route as AuthenticatedOrdersOrderIdIndexRouteImport } from './routes/_authenticated/orders/$orderId/index'
 import { Route as AuthenticatedOrdersOrderIdSettlementRouteImport } from './routes/_authenticated/orders/$orderId/settlement'
-import { Route as ApiPublicWebhooksLogisticsRouteImport } from './routes/api/public/webhooks/logistics'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -107,12 +106,6 @@ const AuthenticatedOrdersOrderIdSettlementRoute =
     path: '/orders/$orderId/settlement',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-const ApiPublicWebhooksLogisticsRoute =
-  ApiPublicWebhooksLogisticsRouteImport.update({
-    id: '/api/public/webhooks/logistics',
-    path: '/api/public/webhooks/logistics',
-    getParentRoute: () => rootRouteImport,
-  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -128,7 +121,6 @@ export interface FileRoutesByFullPath {
   '/shipments/$trackingId': typeof AuthenticatedShipmentsTrackingIdRoute
   '/orders/': typeof AuthenticatedOrdersIndexRoute
   '/orders/$orderId/settlement': typeof AuthenticatedOrdersOrderIdSettlementRoute
-  '/api/public/webhooks/logistics': typeof ApiPublicWebhooksLogisticsRoute
   '/orders/$orderId/': typeof AuthenticatedOrdersOrderIdIndexRoute
 }
 export interface FileRoutesByTo {
@@ -145,7 +137,6 @@ export interface FileRoutesByTo {
   '/shipments/$trackingId': typeof AuthenticatedShipmentsTrackingIdRoute
   '/orders': typeof AuthenticatedOrdersIndexRoute
   '/orders/$orderId/settlement': typeof AuthenticatedOrdersOrderIdSettlementRoute
-  '/api/public/webhooks/logistics': typeof ApiPublicWebhooksLogisticsRoute
   '/orders/$orderId': typeof AuthenticatedOrdersOrderIdIndexRoute
 }
 export interface FileRoutesById {
@@ -164,7 +155,6 @@ export interface FileRoutesById {
   '/_authenticated/shipments/$trackingId': typeof AuthenticatedShipmentsTrackingIdRoute
   '/_authenticated/orders/': typeof AuthenticatedOrdersIndexRoute
   '/_authenticated/orders/$orderId/settlement': typeof AuthenticatedOrdersOrderIdSettlementRoute
-  '/api/public/webhooks/logistics': typeof ApiPublicWebhooksLogisticsRoute
   '/_authenticated/orders/$orderId/': typeof AuthenticatedOrdersOrderIdIndexRoute
 }
 export interface FileRouteTypes {
@@ -183,7 +173,6 @@ export interface FileRouteTypes {
     | '/shipments/$trackingId'
     | '/orders/'
     | '/orders/$orderId/settlement'
-    | '/api/public/webhooks/logistics'
     | '/orders/$orderId/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -200,7 +189,6 @@ export interface FileRouteTypes {
     | '/shipments/$trackingId'
     | '/orders'
     | '/orders/$orderId/settlement'
-    | '/api/public/webhooks/logistics'
     | '/orders/$orderId'
   id:
     | '__root__'
@@ -218,7 +206,6 @@ export interface FileRouteTypes {
     | '/_authenticated/shipments/$trackingId'
     | '/_authenticated/orders/'
     | '/_authenticated/orders/$orderId/settlement'
-    | '/api/public/webhooks/logistics'
     | '/_authenticated/orders/$orderId/'
   fileRoutesById: FileRoutesById
 }
@@ -226,7 +213,6 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
-  ApiPublicWebhooksLogisticsRoute: typeof ApiPublicWebhooksLogisticsRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -336,13 +322,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedOrdersOrderIdSettlementRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/api/public/webhooks/logistics': {
-      id: '/api/public/webhooks/logistics'
-      path: '/api/public/webhooks/logistics'
-      fullPath: '/api/public/webhooks/logistics'
-      preLoaderRoute: typeof ApiPublicWebhooksLogisticsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
   }
 }
 
@@ -384,7 +363,6 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
-  ApiPublicWebhooksLogisticsRoute: ApiPublicWebhooksLogisticsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
