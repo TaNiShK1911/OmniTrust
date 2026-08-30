@@ -18,19 +18,25 @@ def test_get_kpis(mocker):
             "ai_win_rate_pct": 50.0,
         }
     )
-    # Mock DB client to avoid any connect attempts
-    mocker.patch("app.dependencies.db_dep", return_value=mocker.MagicMock())
     
-    from app.security.auth import create_agent_token
-    token = create_agent_token("TestMetricsUser", 1000)
+    from app.dependencies import db_dep
     
-    headers = {"Authorization": f"Bearer {token}"}
+    mock_db = mocker.MagicMock()
+    app.dependency_overrides[db_dep] = lambda: mock_db
     
-    resp = client.get("/api/v1/metrics/kpi", headers=headers)
-    assert resp.status_code == 200
-    data = resp.json()["data"]
-    
-    assert "total_gmv" in data
-    assert "units_sold" in data
-    assert "total_negotiations" in data
-    assert "ai_win_rate_pct" in data
+    try:
+        from app.security.auth import create_agent_token
+        token = create_agent_token("TestMetricsUser", 1000)
+        
+        headers = {"Authorization": f"Bearer {token}"}
+        
+        resp = client.get("/api/v1/metrics/kpi", headers=headers)
+        assert resp.status_code == 200
+        data = resp.json()["data"]
+        
+        assert "total_gmv" in data
+        assert "units_sold" in data
+        assert "total_negotiations" in data
+        assert "ai_win_rate_pct" in data
+    finally:
+        app.dependency_overrides.clear()
