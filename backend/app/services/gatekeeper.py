@@ -261,3 +261,45 @@ def run_settlement_checks(
             rejection_reason=failures[0].detail,
         )
     return GatekeeperResult(passed=True, checks=checks)
+
+
+def run_upsell_checks(
+    *,
+    original_quantity: int,
+    original_price: float,
+    proposed_quantity: int,
+    proposed_price: float,
+    max_discount_pct: float,
+    stock: int,
+    max_order_inr: float,
+) -> GatekeeperResult:
+    """Policy gate for growth agent upsell proposals."""
+    min_allowed_price = original_price * (1.0 - (max_discount_pct / 100.0))
+    
+    checks = [
+        GateCheck(
+            label="Quantity is strictly greater than original",
+            passed=proposed_quantity > original_quantity,
+            detail=f"proposed={proposed_quantity}, original={original_quantity}",
+        ),
+        GateCheck(
+            label="Quantity within available stock",
+            passed=proposed_quantity <= stock,
+            detail=f"proposed={proposed_quantity}, stock={stock}",
+        ),
+        GateCheck(
+            label="Unit price within max discount bound",
+            passed=proposed_price >= min_allowed_price,
+            detail=f"proposed ₹{proposed_price} vs min ₹{min_allowed_price:.2f} (max {max_discount_pct}% off)",
+        ),
+        check_total_order_cap(proposed_price, proposed_quantity, max_order_inr),
+    ]
+
+    failures = [c for c in checks if not c.passed]
+    if failures:
+        return GatekeeperResult(
+            passed=False,
+            checks=checks,
+            rejection_reason=failures[0].detail,
+        )
+    return GatekeeperResult(passed=True, checks=checks)

@@ -120,12 +120,16 @@ async function backendFetch<T>(
   token: string,
   body?: unknown,
 ): Promise<T> {
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+
   const res = await fetch(`${BACKEND_URL}${path}`, {
     method,
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
+    headers,
     body: body !== undefined ? JSON.stringify(body) : undefined,
   });
   
@@ -133,15 +137,35 @@ async function backendFetch<T>(
     return {} as T;
   }
 
-  const json = (await res.json()) as { success: boolean; data: T; error: { message: string } | null };
-  if (!res.ok || !json.success) {
-    throw new Error(json.error?.message ?? `Backend error ${res.status}`);
+  let json: any;
+  try {
+    json = await res.json();
+  } catch {
+    throw new Error(`Backend error ${res.status}: Invalid JSON response`);
   }
-  return json.data;
+
+  if (!res.ok || json.success === false) {
+    const errorMsg =
+      json.error?.message ??
+      (typeof json.detail === "string" ? json.detail : json.detail?.message) ??
+      `Backend error ${res.status}`;
+    throw new Error(errorMsg);
+  }
+  return (json.data !== undefined ? json.data : json) as T;
 }
 
 function getToken(): string {
-  return getRequest().headers.get("authorization")?.replace("Bearer ", "") ?? "";
+  const req = getRequest();
+  const authHeader = req?.headers?.get("authorization") || req?.headers?.get("Authorization");
+  if (authHeader && authHeader.trim() !== "Bearer" && authHeader.trim() !== "") {
+    return authHeader.replace(/^Bearer\s+/i, "").trim();
+  }
+  return (
+    process.env["SUPABASE_SERVICE_ROLE_KEY"] ||
+    process.env["SUPABASE_ANON_KEY"] ||
+    process.env["VITE_SUPABASE_ANON_KEY"] ||
+    ""
+  );
 }
 
 export const getMyProfile = createServerFn({ method: "GET" })

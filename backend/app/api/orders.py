@@ -13,7 +13,11 @@ router = APIRouter(prefix="/api/v1/orders", tags=["orders"])
 def create_from_negotiation(session_id: str, db: DB, user: AuthUser):
     try:
         result = negotiation_service.approve_session(
-            db, session_id=session_id, user_id=user.user_id
+            db,
+            session_id=session_id,
+            user_id=user.user_id,
+            is_external_agent=(user.role == "agent-buyer"),
+            spending_cap=getattr(user, "spending_cap", None),
         )
         order = queries.get_order(db, result["order_id"])
         return {"success": True, "data": order, "error": None}

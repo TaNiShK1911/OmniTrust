@@ -71,9 +71,14 @@ export async function callBackend<T = unknown>(
 
   if (!res.ok || !envelope.success) {
     const err = envelope.error;
+    const detail = (envelope as any).detail;
+    const msg =
+      err?.message ??
+      (typeof detail === "string" ? detail : detail?.message) ??
+      `Backend error (status ${res.status})`;
     throw new BackendError(
       err?.code ?? "BACKEND_ERROR",
-      err?.message ?? `Backend error (status ${res.status})`,
+      msg,
       res.status,
     );
   }

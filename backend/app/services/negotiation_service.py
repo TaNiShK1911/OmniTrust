@@ -13,11 +13,11 @@ from datetime import datetime, timezone
 
 from supabase import Client
 
-from app.agents import buyer_agent, seller_agent
+from app.agents import buyer_agent, seller_agent, growth_agent
 from app.config import get_settings
 from app.db import queries
 from app.services.audit_service import Timer, log_event
-from app.services.gatekeeper import run_negotiation_checks
+from app.services.gatekeeper import run_negotiation_checks, run_upsell_checks
 from app.services.idempotency_service import provider_ref
 
 
@@ -32,6 +32,8 @@ def create_session(
     product_id: str,
     quantity: int,
     buyer_message: str,
+    is_external_agent: bool = False,
+    spending_cap: float | None = None,
 ) -> dict:
     """Validate inputs, create a negotiation session, write opening audit event."""
     settings = get_settings()
@@ -72,7 +74,7 @@ def create_session(
         negotiation_id=negotiation["id"],
         category="guardrail",
         event_type="negotiation.opened",
-        actor="System",
+        actor="External AI Agent" if is_external_agent else "System",
         entity=product["sku"],
         decision="BOUNDS_SET",
         payload={
@@ -82,12 +84,20 @@ def create_session(
             "max_turns": settings.negotiation_max_turns,
             "quantity": quantity,
             "buyer_message": buyer_message[:200],
+            **({"spending_cap": spending_cap} if is_external_agent else {}),
         },
     )
     return negotiation
 
 
-def run_next_turn(db: Client, *, session_id: str, user_id: str) -> dict:
+def run_next_turn(
+    db: Client,
+    *,
+    session_id: str,
+    user_id: str,
+    is_external_agent: bool = False,
+    spending_cap: float | None = None,
+) -> dict:
     """
     Execute one full turn cycle:
       1. Buyer agent proposes
@@ -151,7 +161,7 @@ def run_next_turn(db: Client, *, session_id: str, user_id: str) -> dict:
         negotiation_id=session_id,
         category="ai",
         event_type="buyer_agent.proposal",
-        actor="Buyer Agent",
+        actor="External AI Agent" if is_external_agent else "Buyer Agent",
         entity=product["sku"],
         status="warning" if buyer_error else "success",
         latency_ms=int(buyer_latency * 1000),
@@ -164,6 +174,7 @@ def run_next_turn(db: Client, *, session_id: str, user_id: str) -> dict:
             "action": buyer_proposal.action,
             "rationale": buyer_proposal.message,
             "provider_error": buyer_error,
+            **({"spending_cap": spending_cap} if is_external_agent else {}),
         },
     )
 
@@ -271,8 +282,71 @@ def run_next_turn(db: Client, *, session_id: str, user_id: str) -> dict:
                 actor="System",
                 entity=product["sku"],
                 decision="CONSENSUS_REACHED",
-                payload={"agreed_unit_price": agreed_price, "quantity": quantity},
+                payload={
+                    "agreed_unit_price": agreed_price,
+                    "quantity": quantity,
+                    **({"spending_cap": spending_cap} if is_external_agent else {}),
+                },
             )
+            
+            # Upsell attempt
+            upsell_proposal, upsell_latency, upsell_ai_used, upsell_error = growth_agent.propose_upsell(
+                product_name=product["name"],
+                agreed_price=agreed_price,
+                agreed_quantity=quantity,
+            )
+            
+            if upsell_proposal.action == "PROPOSE_UPSELL":
+                upsell_gate = run_upsell_checks(
+                    original_quantity=quantity,
+                    original_price=agreed_price,
+                    proposed_quantity=upsell_proposal.quantity,
+                    proposed_price=upsell_proposal.unit_price,
+                    max_discount_pct=20.0, # e.g. 20% max discount for upsell
+                    stock=stock,
+                    max_order_inr=settings.max_order_value_inr,
+                )
+                
+                if upsell_gate.passed:
+                    # Update the agreed terms
+                    agreed_price = upsell_proposal.unit_price
+                    quantity = upsell_proposal.quantity
+                    neg["quantity"] = quantity # Update for DB persistence
+                    
+                    log_event(
+                        db,
+                        user_id=user_id,
+                        negotiation_id=session_id,
+                        category="growth",
+                        event_type="growth_agent.upsell_accepted",
+                        actor="Growth Agent",
+                        entity=product["sku"],
+                        status="success",
+                        decision="UPSELL_ACCEPTED",
+                        payload={
+                            "new_quantity": quantity,
+                            "new_unit_price": agreed_price,
+                            "rationale": upsell_proposal.message,
+                        },
+                    )
+                else:
+                    log_event(
+                        db,
+                        user_id=user_id,
+                        negotiation_id=session_id,
+                        category="growth",
+                        event_type="growth_agent.upsell_rejected",
+                        actor="Gatekeeper",
+                        entity=product["sku"],
+                        status="warning",
+                        decision="UPSELL_REJECTED",
+                        payload={
+                            "reason": upsell_gate.rejection_reason,
+                            "proposed_quantity": upsell_proposal.quantity,
+                            "proposed_unit_price": upsell_proposal.unit_price,
+                        },
+                    )
+
     else:
         # Gatekeeper rejected — seller counters deterministically
         counter = round((price_floor + last_seller_price) / 2)
@@ -309,6 +383,7 @@ def run_next_turn(db: Client, *, session_id: str, user_id: str) -> dict:
             "turn_count": turn_number,
             "turns": turns,
             "status": new_status,
+            "quantity": quantity,
             "agreed_unit_price": agreed_price,
         },
     )
@@ -319,7 +394,14 @@ def run_next_turn(db: Client, *, session_id: str, user_id: str) -> dict:
     }
 
 
-def approve_session(db: Client, *, session_id: str, user_id: str) -> dict:
+def approve_session(
+    db: Client,
+    *,
+    session_id: str,
+    user_id: str,
+    is_external_agent: bool = False,
+    spending_cap: float | None = None,
+) -> dict:
     """Human confirmation: convert agreed negotiation into an order."""
     neg = queries.get_negotiation(db, session_id)
     if neg["status"] != "agreed" or not neg.get("agreed_unit_price"):
@@ -360,7 +442,7 @@ def approve_session(db: Client, *, session_id: str, user_id: str) -> dict:
         negotiation_id=session_id,
         category="guardrail",
         event_type="order.created",
-        actor="System",
+        actor="External AI Agent" if is_external_agent else "System",
         entity=order["id"],
         decision="CONSENSUS_APPROVED",
         payload={
@@ -368,6 +450,7 @@ def approve_session(db: Client, *, session_id: str, user_id: str) -> dict:
             "quantity": quantity,
             "total_amount": total,
             "product": product["name"],
+            **({"spending_cap": spending_cap} if is_external_agent else {}),
         },
     )
     return {"order_id": order["id"], "already_existed": False}

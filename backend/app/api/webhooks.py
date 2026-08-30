@@ -62,10 +62,47 @@ async def logistics_webhook(request: Request):
     event_type: str = payload.get("event", "")
     status: str = payload.get("status", "")
     condition: str = payload.get("goods_condition", "")
-    occurred_at: str = payload.get("timestamp", "")
+    occurred_at_str: str = payload.get("timestamp", "")
     event_id: str = payload.get("event_id", "")
 
     db = get_supabase_admin()
+
+    # ── Step 2.5: Replay-window protection ───────────────────────────────────
+    from datetime import datetime, timezone
+    try:
+        ts_str = occurred_at_str.replace("Z", "+00:00")
+        occurred_at = datetime.fromisoformat(ts_str)
+        if occurred_at.tzinfo is None:
+            occurred_at = occurred_at.replace(tzinfo=timezone.utc)
+        
+        now = datetime.now(timezone.utc)
+        diff = (now - occurred_at).total_seconds()
+        if diff > 300 or diff < -60: # 5 mins old or 1 min in future
+            # We don't have user/order yet, so we log system-wide
+            log_event(
+                db,
+                user_id="00000000-0000-0000-0000-000000000000",
+                order_id=None,
+                category="webhook",
+                event_type="webhook.replay_rejected",
+                actor="Gatekeeper",
+                entity=tracking_id,
+                status="failed",
+                request_id=event_id,
+                decision="REPLAY_REJECTED",
+                payload={"timestamp": occurred_at_str, "diff_seconds": diff},
+            )
+            return Response(
+                content='{"success":false,"error":{"code":"REPLAY_ATTEMPT","message":"Webhook timestamp is outside allowed window"}}',
+                status_code=400,
+                media_type="application/json",
+            )
+    except Exception:
+        return Response(
+            content='{"success":false,"error":{"code":"INVALID_TIMESTAMP","message":"Invalid timestamp format"}}',
+            status_code=400,
+            media_type="application/json",
+        )
 
     # ── Step 3: Validate tracking ID ─────────────────────────────────────────
     shipment = queries.get_shipment_by_tracking(db, tracking_id)

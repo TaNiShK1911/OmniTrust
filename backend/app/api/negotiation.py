@@ -24,6 +24,8 @@ def create_negotiation(body: StartNegotiationBody, db: DB, user: AuthUser):
             product_id=body.product_id,
             quantity=body.quantity,
             buyer_message=body.buyer_message,
+            is_external_agent=(user.role == "agent-buyer"),
+            spending_cap=getattr(user, "spending_cap", None),
         )
         return {"success": True, "data": neg, "error": None}
     except ValueError as exc:
@@ -47,7 +49,11 @@ def get_turns(session_id: str, db: DB, user: AuthUser):
 def next_turn(session_id: str, db: DB, user: AuthUser):
     try:
         result = negotiation_service.run_next_turn(
-            db, session_id=session_id, user_id=user.user_id
+            db,
+            session_id=session_id,
+            user_id=user.user_id,
+            is_external_agent=(user.role == "agent-buyer"),
+            spending_cap=getattr(user, "spending_cap", None),
         )
         return {"success": True, "data": result, "error": None}
     except ValueError as exc:
@@ -62,7 +68,11 @@ def next_turn(session_id: str, db: DB, user: AuthUser):
 def approve_negotiation(session_id: str, db: DB, user: AuthUser):
     try:
         result = negotiation_service.approve_session(
-            db, session_id=session_id, user_id=user.user_id
+            db,
+            session_id=session_id,
+            user_id=user.user_id,
+            is_external_agent=(user.role == "agent-buyer"),
+            spending_cap=getattr(user, "spending_cap", None),
         )
         return {"success": True, "data": result, "error": None}
     except ValueError as exc:

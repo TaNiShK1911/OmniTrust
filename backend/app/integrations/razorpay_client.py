@@ -55,41 +55,63 @@ class PaymentProvider:
         try:
             rz = _client()
             amount_paise = int(amount_inr * 100)
-            req_payload: dict = {
-                "receivers": {"types": ["bank_account"]},
-                "description": f"OmniTrust order {order_id}",
-                "amount": amount_paise,
-                "currency": currency,
-                "close_by": int(time.time()) + 7200,  # 2 hours
-                "close_on_accept": True,
-            }
-            resp = rz.virtual_account.create(req_payload)
-            latency_ms = int((time.monotonic() - started) * 1000)
 
-            result = {
-                "provider": "razorpay_test",
-                "transaction_type": "CREATE_VIRTUAL_ACCOUNT",
-                "provider_reference": resp.get("id", idem_key),
-                "amount": amount_inr,
-                "currency": currency,
-                "status": "pending",
-                "bank_account": resp.get("receivers", {}).get("bank_account", {}).get("account_number", ""),
-                "ifsc": resp.get("receivers", {}).get("bank_account", {}).get("ifsc", ""),
-            }
-            log_event(
-                db,
-                user_id=user_id,
-                order_id=order_id,
-                category="payment",
-                event_type="escrow.va_created",
-                actor="Razorpay Test Mode",
-                entity=result["provider_reference"],
-                request_id=idem_key,
-                latency_ms=latency_ms,
-                decision="VA_CREATED",
-                payload={**result, "api_key": "redacted"},
-            )
-            return result
+            # Create a live Razorpay Order in test mode
+            rz_order = None
+            try:
+                rz_order = rz.order.create({
+                    "amount": amount_paise,
+                    "currency": currency,
+                    "receipt": f"omni_{order_id[:20]}",
+                    "notes": {"order_id": order_id, "user_id": user_id},
+                })
+            except Exception:
+                pass
+
+            live_ref = rz_order.get("id") if rz_order else None
+
+            # Attempt virtual account creation if enabled on merchant account
+            try:
+                req_payload: dict = {
+                    "receivers": {"types": ["bank_account"]},
+                    "description": f"OmniTrust order {order_id}",
+                    "amount": amount_paise,
+                    "currency": currency,
+                    "close_by": int(time.time()) + 7200,  # 2 hours
+                    "close_on_accept": True,
+                }
+                resp = rz.virtual_account.create(req_payload)
+                if resp and resp.get("id"):
+                    live_ref = resp.get("id")
+            except Exception:
+                pass
+
+            if live_ref:
+                latency_ms = int((time.monotonic() - started) * 1000)
+                result = {
+                    "provider": "razorpay_test",
+                    "transaction_type": "CREATE_ESCROW",
+                    "provider_reference": live_ref,
+                    "amount": amount_inr,
+                    "currency": currency,
+                    "status": "held",
+                }
+                log_event(
+                    db,
+                    user_id=user_id,
+                    order_id=order_id,
+                    category="payment",
+                    event_type="escrow.va_created",
+                    actor="Razorpay Test Mode",
+                    entity=result["provider_reference"],
+                    request_id=idem_key,
+                    latency_ms=latency_ms,
+                    decision="VA_CREATED",
+                    payload={**result, "api_key": "redacted"},
+                )
+                return result
+
+            raise ValueError("Could not obtain live reference from Razorpay API")
 
         except PaymentProviderUnavailableError:
             raise

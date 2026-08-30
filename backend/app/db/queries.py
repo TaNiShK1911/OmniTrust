@@ -320,3 +320,33 @@ def check_audit_event_exists(
     return bool(res and res.data and len(res.data) > 0)
 
 
+# ── Metrics ───────────────────────────────────────────────────────────────────
+
+
+def get_kpi_metrics(db: Client) -> dict:
+    """Aggregate KPIs for the dashboard."""
+    # Note: In a real production app, you might use RPC or a DB view for this.
+    # For this mock, fetching all orders and negotiations is acceptable since data size is small.
+    orders_res = db.table("orders").select("status, quantity, total_amount").execute()
+    orders = orders_res.data or []
+    
+    neg_res = db.table("negotiations").select("status").execute()
+    negotiations = neg_res.data or []
+    
+    gmv = 0.0
+    units = 0
+    for o in orders:
+        if o["status"] not in ("cancelled", "refunded"):
+            gmv += float(o["total_amount"])
+            units += int(o["quantity"])
+            
+    total_negs = len(negotiations)
+    agreed_negs = sum(1 for n in negotiations if n["status"] in ("agreed", "approved"))
+    win_rate = (agreed_negs / total_negs * 100) if total_negs > 0 else 0.0
+    
+    return {
+        "total_gmv": gmv,
+        "units_sold": units,
+        "total_negotiations": total_negs,
+        "ai_win_rate_pct": round(win_rate, 2),
+    }

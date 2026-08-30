@@ -62,7 +62,7 @@ def call_groq_structured(
                     {"role": "user", "content": user_prompt},
                 ],
                 temperature=temperature,
-                max_completion_tokens=max_tokens,
+                max_tokens=max_tokens,
                 response_format={
                     "type": "json_schema",
                     "json_schema": {

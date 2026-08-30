@@ -6,11 +6,12 @@ Wires together all routers, middleware, and startup checks.
 import time
 import uuid
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, HTTPException
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from app.api import audit, auth, disputes, escrow, health, negotiation, orders, products, shipments, webhooks
+from app.api import agents, audit, auth, catalog, disputes, escrow, health, metrics, negotiation, orders, products, shipments, webhooks
 from app.config import get_settings
 
 settings = get_settings()
@@ -28,7 +29,7 @@ def create_app() -> FastAPI:
     # ── CORS ──────────────────────────────────────────────────────────────────
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=[settings.frontend_origin, "http://localhost:3000", "http://localhost:5173"],
+        allow_origin_regex=r"https?://(localhost|127\.0\.0\.1)(:\d+)?",
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
@@ -46,9 +47,43 @@ def create_app() -> FastAPI:
         response.headers["X-Response-Time-Ms"] = str(elapsed_ms)
         return response
 
-    # ── Global exception handler ──────────────────────────────────────────────
-    @app.exception_handler(RuntimeError)
-    async def runtime_error_handler(request: Request, exc: RuntimeError):
+    # ── Global exception handlers ─────────────────────────────────────────────
+    @app.exception_handler(HTTPException)
+    async def http_exception_handler(request: Request, exc: HTTPException):
+        request_id = getattr(request.state, "request_id", "unknown")
+        if isinstance(exc.detail, dict):
+            code = exc.detail.get("code", "HTTP_ERROR")
+            message = exc.detail.get("message", str(exc.detail))
+        else:
+            code = "HTTP_ERROR"
+            message = str(exc.detail)
+        return JSONResponse(
+            status_code=exc.status_code,
+            content={
+                "success": False,
+                "data": None,
+                "error": {"code": code, "message": message},
+                "request_id": request_id,
+            },
+        )
+
+    @app.exception_handler(RequestValidationError)
+    async def validation_exception_handler(request: Request, exc: RequestValidationError):
+        request_id = getattr(request.state, "request_id", "unknown")
+        errors = exc.errors()
+        message = errors[0].get("msg", "Validation error") if errors else "Validation error"
+        return JSONResponse(
+            status_code=422,
+            content={
+                "success": False,
+                "data": None,
+                "error": {"code": "VALIDATION_ERROR", "message": message, "details": errors},
+                "request_id": request_id,
+            },
+        )
+
+    @app.exception_handler(Exception)
+    async def global_exception_handler(request: Request, exc: Exception):
         request_id = getattr(request.state, "request_id", "unknown")
         return JSONResponse(
             status_code=500,
@@ -62,7 +97,9 @@ def create_app() -> FastAPI:
 
     # ── Routers ───────────────────────────────────────────────────────────────
     app.include_router(health.router)
+    app.include_router(agents.router)
     app.include_router(auth.router)
+    app.include_router(metrics.router)
     app.include_router(products.router)
     app.include_router(negotiation.router)
     app.include_router(orders.router)
@@ -70,6 +107,7 @@ def create_app() -> FastAPI:
     app.include_router(shipments.router)
     app.include_router(disputes.router)
     app.include_router(audit.router)
+    app.include_router(catalog.router)
     app.include_router(webhooks.router)
 
     return app

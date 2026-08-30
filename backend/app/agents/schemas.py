@@ -15,7 +15,7 @@ class AgentProposal(BaseModel):
     The LLM is instructed to respond with exactly this structure.
     """
 
-    action: Literal["PROPOSE", "ACCEPT", "REJECT"]
+    action: Literal["PROPOSE", "ACCEPT", "REJECT", "PROPOSE_UPSELL", "NO_UPSELL"]
     unit_price: float = Field(gt=0, description="Proposed unit price in INR")
     quantity: int = Field(gt=0, description="Requested quantity")
     message: str = Field(max_length=300, description="Human-readable rationale")
