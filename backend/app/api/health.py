@@ -11,13 +11,18 @@ from app.integrations.logistics_client import check_logistics_health
 router = APIRouter(tags=["health"])
 
 
+@router.get("/")
+@router.head("/")
 @router.get("/health")
+@router.head("/health")
 @router.get("/api/health")
+@router.head("/api/health")
 async def health():
     settings = get_settings()
     return {
         "success": True,
         "data": {
+            "service": "OmniTrust API",
             "status": "ok",
             "version": "1.0.0",
             "environment": settings.app_env,
