@@ -34,3 +34,10 @@ Thumbs.db
 
 # Scratch
 scratch/
+
+# Local startup / dev scripts
+*.bat
+*.ps1
+start-all.*
+stop-all.*
+

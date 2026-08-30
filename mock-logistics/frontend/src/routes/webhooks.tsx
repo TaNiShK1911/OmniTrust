@@ -7,13 +7,13 @@ import { webhookEventsQuery } from "@/lib/queries";
 export const Route = createFileRoute("/webhooks")({
   head: () => ({
     meta: [
-      { title: "Webhook Events — OmniLogistics Mock 3PL" },
+      { title: "Webhook Events — OmniLogistics" },
       {
         name: "description",
         content:
           "Every outbound webhook to OmniTrust: event type, delivery attempts, HTTP response codes, HMAC signatures and payloads.",
       },
-      { property: "og:title", content: "Webhook Events — OmniLogistics Mock 3PL" },
+      { property: "og:title", content: "Webhook Events — OmniLogistics" },
       {
         property: "og:description",
         content: "Inspect outbound webhook payloads, attempts and HTTP status codes.",

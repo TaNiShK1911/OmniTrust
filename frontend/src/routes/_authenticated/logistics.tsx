@@ -72,7 +72,7 @@ function Logistics() {
                       Inspect locally
                     </Link>
                     <a
-                      href={`http://localhost:5001/shipments/${shipment.tracking_id}`}
+                      href={`${import.meta.env.VITE_LOGISTICS_URL ?? "http://localhost:5174"}/shipments/${shipment.tracking_id}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="label-mono inline-flex items-center justify-center border border-transparent bg-primary px-3 py-2 text-primary-foreground hover:bg-primary/90"

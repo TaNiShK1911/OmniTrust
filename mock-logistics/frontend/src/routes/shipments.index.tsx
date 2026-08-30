@@ -18,13 +18,13 @@ import { fullTime } from "@/lib/format";
 export const Route = createFileRoute("/shipments/")({
   head: () => ({
     meta: [
-      { title: "Shipments — OmniLogistics Mock 3PL" },
+      { title: "Shipments — OmniLogistics" },
       {
         name: "description",
         content:
           "Searchable shipment register with tracking IDs, order IDs, carrier status, goods condition and operator actions.",
       },
-      { property: "og:title", content: "Shipments — OmniLogistics Mock 3PL" },
+      { property: "og:title", content: "Shipments — OmniLogistics" },
       {
         property: "og:description",
         content: "Filter and operate every shipment in the Mock Logistics simulator.",
@@ -121,7 +121,7 @@ function ShipmentsPage() {
             ) : isError ? (
               <tr>
                 <td colSpan={8} className="px-3 py-6 font-mono text-destructive">
-                  Mock Logistics API unavailable on :5001
+                  Mock Logistics API unavailable
                 </td>
               </tr>
             ) : rows.length === 0 ? (

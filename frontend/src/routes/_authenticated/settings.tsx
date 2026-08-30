@@ -11,10 +11,10 @@ import { fetchDependencies, getMyProfile, resetDemoData, saveMyProfile } from "@
 export const Route = createFileRoute("/_authenticated/settings")({
   head: () => ({
     meta: [
-      { title: "Demo control — OmniTrust" },
-      { name: "description", content: "Profile, policy constants, dependency health and a one-click demo reset." },
-      { property: "og:title", content: "Demo control — OmniTrust" },
-      { property: "og:description", content: "Profile, policy constants and demo reset." },
+      { title: "Settings — OmniTrust" },
+      { name: "description", content: "Profile, policy constants, and dependency health." },
+      { property: "og:title", content: "Settings — OmniTrust" },
+      { property: "og:description", content: "Profile, policy constants and settings." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -66,7 +66,7 @@ function Settings() {
   });
 
   return (
-    <AppShell title="Demo control" subtitle="Profile, policy constants, dependency health and reset.">
+    <AppShell title="Settings" subtitle="Profile, policy constants, dependency health and data controls.">
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="space-y-6 lg:col-span-2">
           <Panel title="Profile">
@@ -149,7 +149,7 @@ function Settings() {
             </div>
           </Panel>
 
-          <Panel title="Reset demo data">
+          <Panel title="Reset account data">
             <p className="text-sm text-muted-foreground">
               Deletes your negotiations, orders, shipments, disputes and audit events. The shared product catalog is
               untouched.
@@ -165,7 +165,7 @@ function Settings() {
               disabled={resetDemo.isPending}
               className="mt-4 w-full"
             >
-              {resetDemo.isPending ? "Resetting…" : "Reset my demo data"}
+              {resetDemo.isPending ? "Resetting…" : "Reset my account data"}
             </ActionButton>
           </Panel>
         </div>

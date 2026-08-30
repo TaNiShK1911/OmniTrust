@@ -11,7 +11,7 @@ export const Route = createFileRoute("/_authenticated/onboarding")({
   head: () => ({
     meta: [
       { title: "Finish setup — OmniTrust" },
-      { name: "description", content: "Complete your OmniTrust operator profile and pick a demo scenario." },
+      { name: "description", content: "Complete your OmniTrust operator profile and preferred evaluation scenario." },
       { property: "og:title", content: "Finish setup — OmniTrust" },
       { property: "og:description", content: "Complete your OmniTrust operator profile." },
       { property: "og:type", content: "website" },
@@ -113,7 +113,7 @@ function Onboarding() {
                 </div>
               </div>
               <div>
-                <span className="label-mono text-muted-foreground">Preferred demo scenario</span>
+                <span className="label-mono text-muted-foreground">Evaluation scenario</span>
                 <div className="mt-1 flex gap-px bg-border">
                   {[
                     { key: "delivered", label: "Delivered → settle" },

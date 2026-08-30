@@ -21,7 +21,7 @@ const nav = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { to: "/shipments", label: "Shipments", icon: Boxes },
   { to: "/webhooks", label: "Webhook Events", icon: Radio },
-  { to: "/demo", label: "Demo", icon: FlaskConical },
+  { to: "/demo", label: "Simulate events", icon: FlaskConical },
 ] as const;
 
 export function WarehouseLayout({ children }: { children: ReactNode }) {
@@ -54,7 +54,7 @@ export function WarehouseLayout({ children }: { children: ReactNode }) {
             <span className="font-mono text-sm tracking-[0.2em] uppercase">Omnilogistics</span>
           </Link>
           <span className="rounded-sm border border-border px-2 py-0.5 font-mono text-[10px] tracking-[0.12em] text-muted-foreground uppercase">
-            Mock 3PL / Demo Environment
+            Mock 3PL Simulator
           </span>
 
           <nav className="ml-2 flex flex-wrap gap-1">
@@ -89,7 +89,7 @@ export function WarehouseLayout({ children }: { children: ReactNode }) {
               <span className={up ? "text-success" : "text-destructive"}>
                 {up ? "Connected" : "Disconnected"}
               </span>
-              <span className="text-muted-foreground">API :5001</span>
+              <span className="text-muted-foreground">API</span>
             </div>
             <Button size="sm" variant="ghost" onClick={() => qc.invalidateQueries()}>
               <RefreshCw className="size-3.5" /> Refresh
@@ -111,7 +111,7 @@ export function WarehouseLayout({ children }: { children: ReactNode }) {
       {!up && !health.isLoading ? (
         <div className="border-b border-destructive/40 bg-destructive/10 px-5 py-3">
           <div className="mx-auto flex max-w-[1600px] items-center gap-4 font-mono text-xs text-destructive">
-            Mock Logistics API unavailable on :5001
+            Mock Logistics API unavailable
             <Button size="sm" variant="outline" onClick={() => health.refetch()}>
               Retry
             </Button>

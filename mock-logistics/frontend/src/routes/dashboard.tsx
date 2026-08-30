@@ -8,13 +8,13 @@ import { WebhookTerminal } from "@/components/WebhookTerminal";
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
     meta: [
-      { title: "Warehouse Dashboard — OmniLogistics Mock 3PL" },
+      { title: "Warehouse Dashboard — OmniLogistics" },
       {
         name: "description",
         content:
           "Live operations dashboard for active shipments, transit scans, delivery and damage events, and outbound webhook status codes.",
       },
-      { property: "og:title", content: "Warehouse Dashboard — OmniLogistics Mock 3PL" },
+      { property: "og:title", content: "Warehouse Dashboard — OmniLogistics" },
       {
         property: "og:description",
         content: "Active shipment queue and live outbound webhook feed for the 3PL simulator.",
@@ -75,7 +75,7 @@ function Dashboard() {
             </div>
           ) : shipments.isError ? (
             <div className="panel border-destructive/40 p-6 font-mono text-sm text-destructive">
-              Mock Logistics API unavailable on :5001
+              Mock Logistics API unavailable
             </div>
           ) : active.length === 0 ? (
             <div className="panel p-6 font-mono text-sm text-muted-foreground">

@@ -21,13 +21,13 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "OmniLogistics is a mock 3PL warehouse console: scan shipments into transit, confirm deliveries, report damage, and watch signed webhooks stream live. Demo credentials included.",
+          "A mock third-party logistics provider: scan shipments into transit, confirm delivery, report damage, and see every signed outbound event as it happens.",
       },
       { property: "og:title", content: "OmniLogistics — 3PL Warehouse Operations Console" },
       {
         property: "og:description",
         content:
-          "Operate shipments and inspect signed outbound webhooks in a live 3PL simulator. Instant demo access.",
+          "A mock third-party logistics provider: scan shipments into transit, confirm delivery, report damage, and see every signed outbound event as it happens.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -77,7 +77,7 @@ function Landing() {
           <Truck className="size-5 text-primary" />
           <span className="font-mono text-sm tracking-[0.2em] uppercase">Omnilogistics</span>
           <span className="hidden rounded-sm border border-border px-2 py-0.5 font-mono text-[10px] tracking-[0.12em] text-muted-foreground uppercase sm:inline">
-            Mock 3PL / Demo Environment
+            Mock 3PL Simulator
           </span>
           <div className="ml-auto flex items-center gap-2">
             {operator ? (
@@ -90,7 +90,7 @@ function Landing() {
                   <Link to="/auth">Sign in</Link>
                 </Button>
                 <Button asChild size="sm">
-                  <Link to="/auth">Get demo access</Link>
+                  <Link to="/auth">Reviewer access</Link>
                 </Button>
               </>
             )}
@@ -108,7 +108,7 @@ function Landing() {
               <span className={up ? "text-success" : "text-destructive"}>
                 {health.isLoading ? "Checking service…" : up ? "Service online" : "Service down"}
               </span>
-              <span className="text-muted-foreground">/ API :5001</span>
+              <span className="text-muted-foreground">· API status</span>
             </div>
 
             <h1 className="mt-5 text-4xl leading-[1.05] font-semibold tracking-tight sm:text-6xl">
@@ -117,14 +117,14 @@ function Landing() {
             </h1>
             <p className="mt-5 max-w-xl text-base text-muted-foreground">
               OmniLogistics simulates a third-party logistics provider end to end — shipment
-              scanning, delivery confirmation, damage reporting, and signed outbound webhooks —
-              so you can build and test integrations against realistic operational traffic.
+              scanning, delivery confirmation, damage reporting, and signed outbound events —
+              standing in for the courier network that OmniTrust settles against.
             </p>
 
             <div className="mt-8 flex flex-wrap gap-3">
               <Button asChild size="lg">
                 <Link to="/auth">
-                  Start with demo credentials <ArrowRight className="size-4" />
+                  Continue as reviewer <ArrowRight className="size-4" />
                 </Link>
               </Button>
               <Button asChild size="lg" variant="outline">
@@ -132,7 +132,7 @@ function Landing() {
               </Button>
             </div>
             <p className="label-xs mt-3">
-              operator@mocklogistics.io / warehouse123 — one click, no signup required
+              No signup needed — one click signs you in as the evaluation operator.
             </p>
           </div>
 
@@ -155,15 +155,13 @@ function Landing() {
             </dl>
             <div className="mt-4 space-y-2 font-mono text-[11px] text-muted-foreground">
               <div className="flex items-center gap-2">
-                <Activity className="size-3.5 text-success" /> POST /webhooks/shipment.delivered →
-                200
+                <Activity className="size-3.5 text-success" /> Delivery confirmed and webhook sent
               </div>
               <div className="flex items-center gap-2">
-                <Activity className="size-3.5 text-warning" /> POST /webhooks/shipment.damaged →
-                retry 2
+                <Activity className="size-3.5 text-warning" /> Damage report queued for retry
               </div>
               <div className="flex items-center gap-2">
-                <Activity className="size-3.5 text-primary" /> GET /shipments → 200
+                <Activity className="size-3.5 text-primary" /> Shipment list refreshed
               </div>
             </div>
           </div>
@@ -184,11 +182,11 @@ function Landing() {
       </section>
 
       <section className="border-t border-border bg-panel">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-6 px-5 py-14">
+        <div className="mx-auto max-w-6xl flex-wrap items-center justify-between gap-6 px-5 py-14">
           <div>
             <h2 className="text-2xl font-semibold">Ready to operate?</h2>
             <p className="mt-2 text-sm text-muted-foreground">
-              Sign in with the demo operator and start moving freight in seconds.
+              See the full shipment lifecycle in seconds — no setup required.
             </p>
           </div>
           <Button asChild size="lg">
@@ -203,7 +201,6 @@ function Landing() {
       <footer className="border-t border-border">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-5 py-6 font-mono text-[11px] tracking-[0.1em] text-muted-foreground uppercase">
           <span>OmniLogistics — Mock 3PL simulator</span>
-          <span>Demo environment · No real freight was harmed</span>
         </div>
       </footer>
     </div>

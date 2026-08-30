@@ -22,16 +22,16 @@ import { toast } from "sonner";
 export const Route = createFileRoute("/demo")({
   head: () => ({
     meta: [
-      { title: "Demo Controls — OmniLogistics Mock 3PL" },
+      { title: "Simulate Events — OmniLogistics" },
       {
         name: "description",
         content:
-          "Demo-only helpers to seed shipments, trigger delivery and damage events, and reset state.",
+          "Trigger delivery and damage events to see the full settlement flow end to end.",
       },
-      { property: "og:title", content: "Demo Controls — OmniLogistics Mock 3PL" },
+      { property: "og:title", content: "Simulate Events — OmniLogistics" },
       {
         property: "og:description",
-        content: "Seed, reset and trigger events for reliable happy-path and damage-path demos.",
+        content: "Trigger delivery and damage events to see the full settlement flow end to end.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -58,9 +58,9 @@ function DemoPage() {
   return (
     <WarehouseLayout>
       <div className="mb-4 flex items-center gap-3">
-        <h1 className="label-xs">Demo Controls</h1>
-        <span className="rounded-sm border border-warning/40 bg-warning/10 px-2 py-0.5 font-mono text-[10px] tracking-[0.12em] text-warning uppercase">
-          Demo Only
+        <h1 className="label-xs">Simulate Events</h1>
+        <span className="rounded-sm border border-primary/40 bg-primary/10 px-2 py-0.5 font-mono text-[10px] tracking-[0.12em] text-primary uppercase">
+          Event Simulator
         </span>
       </div>
 

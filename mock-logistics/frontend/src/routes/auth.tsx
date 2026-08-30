@@ -15,12 +15,12 @@ export const Route = createFileRoute("/auth")({
       {
         name: "description",
         content:
-          "Sign in or create an operator account to access the OmniLogistics 3PL warehouse console. Demo credentials provided for instant access.",
+          "Sign in or create an operator account to access the OmniLogistics 3PL warehouse console.",
       },
       { property: "og:title", content: "Operator Sign In — OmniLogistics" },
       {
         property: "og:description",
-        content: "Access the warehouse console with one-click demo credentials.",
+        content: "Access the warehouse console with one-click evaluation access.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -75,7 +75,7 @@ function AuthPage() {
             </li>
           </ul>
         </div>
-        <p className="label-xs">Mock 3PL / Demo Environment</p>
+        <p className="label-xs">Mock 3PL Simulator</p>
       </aside>
 
       <main className="flex items-center justify-center px-5 py-14">
@@ -83,24 +83,17 @@ function AuthPage() {
           <h1 className="font-mono text-lg tracking-[0.18em] uppercase">Operator Access</h1>
           <p className="label-xs mt-1">Authenticate to enter the warehouse console</p>
 
-          <div className="mt-5 rounded-sm border border-primary/30 bg-primary/8 p-4">
-            <div className="label-xs text-primary">Demo credentials</div>
-            <dl className="mt-2 space-y-1 font-mono text-xs text-foreground">
-              <div className="flex justify-between gap-4">
-                <dt className="text-muted-foreground">email</dt>
-                <dd>{DEMO_CREDENTIALS.email}</dd>
-              </div>
-              <div className="flex justify-between gap-4">
-                <dt className="text-muted-foreground">password</dt>
-                <dd>{DEMO_CREDENTIALS.password}</dd>
-              </div>
-            </dl>
+          <div className="mt-5 rounded-sm border border-border bg-card p-4">
+            <div className="label-xs text-primary">Reviewer access</div>
+            <p className="mt-2 font-mono text-xs text-muted-foreground">
+              No signup needed — one click signs you in as the evaluation operator.
+            </p>
             <Button
               className="mt-3 w-full"
               disabled={busy}
-              onClick={() => void run(signInAsDemo, "Signed in as demo operator")}
+              onClick={() => void run(signInAsDemo, "Signed in as evaluation operator")}
             >
-              Quick access as demo operator
+              {busy ? "Signing in…" : "Continue as reviewer →"}
             </Button>
           </div>
 
@@ -129,7 +122,6 @@ function AuthPage() {
                     name="email"
                     type="email"
                     required
-                    defaultValue={DEMO_CREDENTIALS.email}
                     autoComplete="email"
                   />
                 </div>
@@ -140,7 +132,6 @@ function AuthPage() {
                     name="password"
                     type="password"
                     required
-                    defaultValue={DEMO_CREDENTIALS.password}
                     autoComplete="current-password"
                   />
                 </div>
@@ -195,7 +186,7 @@ function AuthPage() {
           </Tabs>
 
           <p className="mt-6 text-center text-xs text-muted-foreground">
-            Demo environment — accounts are stored locally in this browser only.
+            Evaluation environment — accounts are stored locally in this browser session.
           </p>
         </div>
       </main>

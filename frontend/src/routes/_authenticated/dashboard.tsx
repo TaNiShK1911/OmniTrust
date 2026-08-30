@@ -13,7 +13,7 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
       { title: "Dashboard — OmniTrust settlement console" },
       {
         name: "description",
-        content: "Live view of negotiations, escrow, shipments, settlements and disputes across the demo.",
+        content: "Live view of negotiations, escrow, shipments, settlements and disputes across your account.",
       },
       { property: "og:title", content: "Dashboard — OmniTrust settlement console" },
       { property: "og:description", content: "Live view of negotiations, escrow, shipments and settlements." },

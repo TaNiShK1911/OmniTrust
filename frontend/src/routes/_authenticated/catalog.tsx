@@ -12,9 +12,9 @@ export const Route = createFileRoute("/_authenticated/catalog")({
   head: () => ({
     meta: [
       { title: "Catalog — OmniTrust" },
-      { name: "description", content: "Demo B2B catalog. Open a bounded agent negotiation on any line item." },
+      { name: "description", content: "B2B catalog. Open a bounded agent negotiation on any line item." },
       { property: "og:title", content: "Catalog — OmniTrust" },
-      { property: "og:description", content: "Demo B2B catalog with bounded agent negotiation." },
+      { property: "og:description", content: "B2B catalog with bounded agent negotiation." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],

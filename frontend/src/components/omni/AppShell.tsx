@@ -9,7 +9,7 @@ const NAV = [
   { to: "/catalog", label: "Catalog" },
   { to: "/orders", label: "Orders" },
   { to: "/logistics", label: "Logistics" },
-  { to: "/settings", label: "Demo control" },
+  { to: "/settings", label: "Settings" },
 ] as const;
 
 export function AppShell({

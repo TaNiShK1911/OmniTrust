@@ -1,4 +1,16 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import {
+  Globe,
+  Server,
+  Bot,
+  ShieldCheck,
+  CreditCard,
+  FileText,
+  Truck,
+  ArrowRight,
+  ArrowDown,
+  Lock,
+} from "lucide-react";
 
 const TITLE = "OmniTrust — AI agents that negotiate, transact and settle with guardrails";
 const DESC =
@@ -78,7 +90,7 @@ function Landing() {
               search={{ mode: "signup", next: "/dashboard" }}
               className="label-mono lift bg-primary px-4 py-2.5 text-primary-foreground"
             >
-              Start demo →
+              Enter console →
             </Link>
           </div>
         </div>
@@ -130,21 +142,148 @@ function Landing() {
 
       <section id="architecture" className="panel-dark section-pad border-b-0">
         <div className="mx-auto max-w-[1280px] px-4 md:px-6">
-          <h2 className="headline-lg">Architecture</h2>
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <div>
+              <span className="label-mono text-terminal">System Topology</span>
+              <h2 className="headline-lg mt-2">Server-Authoritative Architecture</h2>
+            </div>
+            <span className="label-mono border border-navy-border px-3 py-1.5 text-navy-muted">
+              Zero client-side secrets
+            </span>
+          </div>
           <p className="mt-4 max-w-2xl text-sm text-navy-muted">
-            The browser never touches a provider. Every model call, policy decision, payment action and webhook
-            verification happens server-side and is written to an append-only audit table.
+            The browser never touches LLM credentials or settlement keys. Every model interaction, policy decision,
+            escrow transition, and webhook verification is executed server-side and recorded to an immutable ledger.
           </p>
-          <pre className="mono-id mt-10 overflow-x-auto border border-navy-border p-6 text-[13px] leading-7">{`Browser
-   |  typed server functions (session bearer)
-   v
-OmniTrust server  ->  AI gateway        (proposals only, never final price)
-                  ->  Policy gatekeeper (deterministic, code-enforced)
-                  ->  Escrow provider   (test mode, idempotent)
-                  ->  Audit log         (append-only)
-   ^
-   |  signed webhook  (HMAC-SHA256)
-Mock 3PL / warehouse portal`}</pre>
+
+          <div className="mt-10 space-y-4">
+            {/* Tier 1: Client Application */}
+            <div className="rounded border border-navy-border bg-white/[0.02] p-5">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="flex size-9 items-center justify-center rounded border border-navy-border bg-white/5 text-terminal">
+                    <Globe className="size-4" />
+                  </div>
+                  <div>
+                    <h3 className="font-display text-sm font-semibold text-navy-foreground">Client Console (Browser)</h3>
+                    <p className="text-xs text-navy-muted">Operator UI & real-time negotiation views</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="label-mono rounded border border-terminal/40 bg-terminal/10 px-2.5 py-1 text-xs text-terminal">
+                    Session Bearer Token
+                  </span>
+                  <span className="label-mono rounded border border-navy-border px-2.5 py-1 text-xs text-navy-muted">
+                    Typed Server Functions
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Connector Down */}
+            <div className="flex items-center justify-center">
+              <div className="flex items-center gap-2 rounded-full border border-navy-border bg-navy-muted/10 px-3 py-1 text-xs text-navy-muted">
+                <ArrowDown className="size-3 text-terminal animate-pulse" />
+                <span className="font-mono text-[11px]">Authenticated RPC Requests</span>
+              </div>
+            </div>
+
+            {/* Tier 2: OmniTrust Core Backend Engine */}
+            <div className="rounded border border-terminal/40 bg-white/[0.03] p-6 shadow-xl ring-1 ring-terminal/10">
+              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-navy-border pb-4">
+                <div className="flex items-center gap-3">
+                  <div className="flex size-9 items-center justify-center rounded border border-terminal bg-terminal/10 text-terminal">
+                    <Server className="size-5" />
+                  </div>
+                  <div>
+                    <h3 className="font-display text-base font-semibold text-navy-foreground">
+                      OmniTrust Core Settlement Engine
+                    </h3>
+                    <p className="text-xs text-navy-muted">Server-side policy enforcement & state machine</p>
+                  </div>
+                </div>
+                <span className="label-mono rounded border border-terminal bg-terminal px-2.5 py-1 text-xs font-semibold text-navy">
+                  Authoritative Core
+                </span>
+              </div>
+
+              <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="rounded border border-navy-border bg-white/[0.02] p-4 transition-colors hover:border-terminal/50">
+                  <div className="flex items-center gap-2 text-terminal">
+                    <Bot className="size-4" />
+                    <span className="font-mono text-xs font-semibold uppercase tracking-wider">AI Gateway</span>
+                  </div>
+                  <h4 className="mt-2 text-sm font-medium text-navy-foreground">Bounded LLM Agent</h4>
+                  <p className="mt-1 text-xs text-navy-muted">
+                    Proposals only — agent recommendations never unilaterally commit price.
+                  </p>
+                </div>
+
+                <div className="rounded border border-navy-border bg-white/[0.02] p-4 transition-colors hover:border-terminal/50">
+                  <div className="flex items-center gap-2 text-terminal">
+                    <ShieldCheck className="size-4" />
+                    <span className="font-mono text-xs font-semibold uppercase tracking-wider">Gatekeeper</span>
+                  </div>
+                  <h4 className="mt-2 text-sm font-medium text-navy-foreground">Policy Guardrails</h4>
+                  <p className="mt-1 text-xs text-navy-muted">
+                    Deterministic code checks: turn budget (≤4) & server-side price floors.
+                  </p>
+                </div>
+
+                <div className="rounded border border-navy-border bg-white/[0.02] p-4 transition-colors hover:border-terminal/50">
+                  <div className="flex items-center gap-2 text-terminal">
+                    <CreditCard className="size-4" />
+                    <span className="font-mono text-xs font-semibold uppercase tracking-wider">Escrow Flow</span>
+                  </div>
+                  <h4 className="mt-2 text-sm font-medium text-navy-foreground">Payment Subsystem</h4>
+                  <p className="mt-1 text-xs text-navy-muted">
+                    Razorpay Test Mode with idempotent money actions and automatic releases.
+                  </p>
+                </div>
+
+                <div className="rounded border border-navy-border bg-white/[0.02] p-4 transition-colors hover:border-terminal/50">
+                  <div className="flex items-center gap-2 text-terminal">
+                    <FileText className="size-4" />
+                    <span className="font-mono text-xs font-semibold uppercase tracking-wider">Audit Ledger</span>
+                  </div>
+                  <h4 className="mt-2 text-sm font-medium text-navy-foreground">Immutable Trail</h4>
+                  <p className="mt-1 text-xs text-navy-muted">
+                    Append-only cryptographic record of all turns, policy checks, and webhooks.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Connector Up/Down */}
+            <div className="flex items-center justify-center">
+              <div className="flex items-center gap-2 rounded-full border border-navy-border bg-navy-muted/10 px-3 py-1 text-xs text-navy-muted">
+                <Lock className="size-3 text-terminal" />
+                <span className="font-mono text-[11px]">HMAC-SHA256 Webhook Ingestion</span>
+              </div>
+            </div>
+
+            {/* Tier 3: External 3PL Network */}
+            <div className="rounded border border-navy-border bg-white/[0.02] p-5">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="flex size-9 items-center justify-center rounded border border-navy-border bg-white/5 text-terminal">
+                    <Truck className="size-4" />
+                  </div>
+                  <div>
+                    <h3 className="font-display text-sm font-semibold text-navy-foreground">
+                      Mock 3PL / Logistics Warehouse
+                    </h3>
+                    <p className="text-xs text-navy-muted">
+                      Physical parcel scans, delivery proofs & automated damage reports
+                    </p>
+                  </div>
+                </div>
+                <span className="label-mono rounded border border-terminal/40 bg-terminal/10 px-2.5 py-1 text-xs text-terminal">
+                  Signed Webhooks (HMAC-SHA256)
+                </span>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -167,8 +306,7 @@ Mock 3PL / warehouse portal`}</pre>
           <div>
             <h2 className="headline-lg">Follow the whole story in one sitting.</h2>
             <p className="mt-3 max-w-xl text-sm text-muted-foreground">
-              Catalog → negotiation → gatekeeper → escrow → shipment → signed webhook → settlement or refund → audit
-              trail. No developer tools required.
+              Catalog · Negotiation · Gatekeeper · Escrow · Shipment · Signed Webhook · Settlement / Refund · Audit Trail. No developer tools required.
             </p>
           </div>
           <Link
@@ -185,10 +323,11 @@ Mock 3PL / warehouse portal`}</pre>
         <div className="mx-auto flex max-w-[1280px] flex-wrap items-center justify-between gap-4 px-4 py-8 md:px-6">
           <p className="label-mono text-navy-muted">OmniTrust · buildathon track: agentic commerce</p>
           <p className="mono-id text-navy-muted">
-            Demo environment. Payments run in test mode; no real funds ever move.
+            Running in Razorpay Test Mode — no real funds ever move.
           </p>
         </div>
       </footer>
     </div>
   );
 }
+

@@ -9,7 +9,7 @@ import { safePath } from "@/lib/omni";
 type Search = { mode?: "signin" | "signup"; next?: string | undefined };
 
 const TITLE = "Sign in — OmniTrust settlement console";
-const DESC = "Access the OmniTrust demo console: bounded agent negotiation, escrow, shipment verification and audit.";
+const DESC = "Access the OmniTrust console: bounded agent negotiation, escrow, shipment verification and audit.";
 
 export const Route = createFileRoute("/auth")({
   validateSearch: (search: Record<string, unknown>): Search => ({
@@ -61,7 +61,7 @@ function AuthPage() {
     if (isSignup) {
       if (password.length < 8) return setError("Password must be at least 8 characters.");
       if (password !== confirm) return setError("Passwords do not match.");
-      if (!accepted) return setError("Please accept the demo disclaimer.");
+      if (!accepted) return setError("Please accept the terms to proceed.");
     }
 
     setBusy(true);
@@ -158,35 +158,21 @@ Settlement            SELLER_PAID`}</pre>
           </Link>
           <h1 className="headline-lg mt-6">{isSignup ? "Create account" : "Sign in"}</h1>
           <p className="mt-2 text-sm text-muted-foreground">
-            {isSignup ? "Set up an operator account for the demo." : "Continue to the settlement console."}
+            {isSignup ? "Set up an operator account." : "Continue to the settlement console."}
           </p>
 
-          <div className="mt-6 border border-terminal bg-terminal/5 p-4">
-            <p className="label-mono text-muted-foreground">Demo credentials</p>
-            <div className="mono-id mt-2 space-y-0.5 text-foreground">
-              <p>email &nbsp;&nbsp;&nbsp;{DEMO_EMAIL}</p>
-              <p>password {DEMO_PASSWORD}</p>
-            </div>
-            <div className="mt-3 flex gap-px bg-border">
-              <button
-                type="button"
-                onClick={demoLogin}
-                disabled={busy}
-                className="label-mono lift flex-1 bg-terminal px-3 py-2.5 text-navy disabled:opacity-50"
-              >
-                {busy ? "Working…" : "One-click demo login →"}
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setEmail(DEMO_EMAIL);
-                  setPassword(DEMO_PASSWORD);
-                }}
-                className="label-mono bg-background px-3 py-2.5 text-muted-foreground"
-              >
-                Fill form
-              </button>
-            </div>
+          <div className="mt-6 border border-border bg-card p-4">
+            <button
+              type="button"
+              onClick={demoLogin}
+              disabled={busy}
+              className="label-mono lift w-full bg-primary px-4 py-2.5 text-primary-foreground disabled:opacity-50"
+            >
+              {busy ? "Working…" : "Continue as judge / reviewer →"}
+            </button>
+            <p className="mt-2 text-xs text-muted-foreground">
+              No account needed — this signs you in with a shared evaluation account.
+            </p>
           </div>
 
           <form onSubmit={submit} className="mt-8 space-y-4">
@@ -286,7 +272,7 @@ Settlement            SELLER_PAID`}</pre>
                     onChange={(e) => setAccepted(e.target.checked)}
                     className="mt-1 size-4 accent-[oklch(0.577_0.235_267)]"
                   />
-                  This is a demo environment. Payments run in test mode and no real funds move.
+                  Running in Razorpay Test Mode — no real funds ever move.
                 </label>
               </>
             ) : null}
