@@ -10,8 +10,45 @@ from app.db import queries
 
 client = TestClient(app)
 
-def test_external_agent_flow():
-    db = get_supabase_admin()
+def test_external_agent_flow(mocker):
+    # Mock DB client fetching
+    mock_db = mocker.MagicMock()
+    mocker.patch("app.db.supabase.get_supabase_admin", return_value=mock_db)
+    mocker.patch("app.dependencies.db_dep", return_value=mock_db)
+
+    # Mock queries
+    mocker.patch(
+        "app.db.queries.list_products",
+        return_value=[{"id": "prod-1", "sku": "TEST-SKU", "list_price": 1000, "stock": 10}]
+    )
+    mocker.patch(
+        "app.db.queries.get_product",
+        return_value={"id": "prod-1", "sku": "TEST-SKU", "name": "Test", "list_price": 1000, "stock": 10}
+    )
+    mocker.patch(
+        "app.db.queries.create_negotiation",
+        return_value={"id": "neg-1"}
+    )
+    
+    # We need to capture what is logged to assert on it
+    log_events = []
+    def mock_insert_audit_event(db, fields):
+        log_events.append(fields)
+        return fields
+    mocker.patch("app.services.audit_service.queries.insert_audit_event", side_effect=mock_insert_audit_event)
+    
+    mocker.patch(
+        "app.db.queries.list_audit_events",
+        side_effect=lambda db, **kwargs: log_events
+    )
+
+    db = mock_db
+    
+    # Override AuthUser dependency so we get our agent-buyer
+    from app.dependencies import get_current_user, CurrentUser
+    app.dependency_overrides[get_current_user] = lambda: CurrentUser(
+        user_id="test-agent-1", email="agent@test.local", role="agent-buyer", spending_cap=50000.0
+    )
     
     # 1. Ensure we have a product
     products = queries.list_products(db, limit=1)
@@ -45,3 +82,5 @@ def test_external_agent_flow():
     assert event["actor"] == "External AI Agent"
     assert "spending_cap" in event["payload"]
     assert event["payload"]["spending_cap"] == 50000.0
+
+    app.dependency_overrides.clear()

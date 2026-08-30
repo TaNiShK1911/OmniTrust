@@ -65,8 +65,6 @@ async def logistics_webhook(request: Request):
     occurred_at_str: str = payload.get("timestamp", "")
     event_id: str = payload.get("event_id", "")
 
-    db = get_supabase_admin()
-
     # ── Step 2.5: Replay-window protection ───────────────────────────────────
     from datetime import datetime, timezone
     try:
@@ -79,6 +77,7 @@ async def logistics_webhook(request: Request):
         diff = (now - occurred_at).total_seconds()
         if diff > 300 or diff < -60: # 5 mins old or 1 min in future
             # We don't have user/order yet, so we log system-wide
+            db = get_supabase_admin()
             log_event(
                 db,
                 user_id="00000000-0000-0000-0000-000000000000",
@@ -105,6 +104,7 @@ async def logistics_webhook(request: Request):
         )
 
     # ── Step 3: Validate tracking ID ─────────────────────────────────────────
+    db = get_supabase_admin()
     shipment = queries.get_shipment_by_tracking(db, tracking_id)
     if not shipment:
         return Response(

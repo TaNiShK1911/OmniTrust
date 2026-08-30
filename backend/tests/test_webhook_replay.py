@@ -9,7 +9,13 @@ from app.main import app
 
 client = TestClient(app)
 
-def test_webhook_replay_protection():
+def test_webhook_replay_protection(mocker):
+    # Mock DB client to avoid live DB connections
+    mock_db = mocker.MagicMock()
+    mocker.patch("app.api.webhooks.get_supabase_admin", return_value=mock_db)
+    mocker.patch("app.db.queries.get_shipment_by_tracking", return_value=None)
+    mocker.patch("app.api.webhooks.log_event")
+
     import hmac
     import hashlib
     import json

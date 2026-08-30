@@ -18,27 +18,29 @@ def test_catalog_manifest():
     assert "endpoints" in data
 
 
-def test_catalog_feed_format_and_privacy():
-    db = get_supabase_admin()
-    
-    # Create a couple of mock products just to be sure there's data
-    try:
-        queries.create_product(db, {
-            "sku": "TEST-SKU-AGENT-1",
-            "name": "Agent Test Product 1",
-            "list_price": 1000,
-            "price_floor": 800,
-            "stock": 10,
-        })
-        queries.create_product(db, {
-            "sku": "TEST-SKU-AGENT-2",
-            "name": "Agent Test Product 2",
-            "list_price": 2000,
-            "price_floor": 1500,
-            "stock": 0,
-        })
-    except Exception:
-        pass # Ignore if they exist
+def test_catalog_feed_format_and_privacy(mocker):
+    # Mock list_products to avoid hitting a live DB
+    mocker.patch(
+        "app.db.queries.list_products",
+        return_value=[
+            {
+                "id": "prod-1",
+                "sku": "TEST-SKU-AGENT-1",
+                "name": "Agent Test Product 1",
+                "list_price": 1000,
+                "price_floor": 800,
+                "stock": 10,
+            },
+            {
+                "id": "prod-2",
+                "sku": "TEST-SKU-AGENT-2",
+                "name": "Agent Test Product 2",
+                "list_price": 2000,
+                "price_floor": 1500,
+                "stock": 0,
+            }
+        ]
+    )
 
     response = client.get("/api/v1/catalog/agent-feed")
     assert response.status_code == 200
