@@ -1,5 +1,14 @@
+function parseIso(iso: string): Date {
+  if (!iso) return new Date();
+  const normalized = iso.endsWith("Z") || iso.includes("+") ? iso : `${iso}Z`;
+  const d = new Date(normalized);
+  return isNaN(d.getTime()) ? new Date(iso) : d;
+}
+
 export function relTime(iso: string): string {
-  const diff = Date.now() - new Date(iso).getTime();
+  if (!iso) return "—";
+  const date = parseIso(iso);
+  const diff = Math.max(0, Date.now() - date.getTime());
   const m = Math.round(diff / 60000);
   if (m < 1) return "just now";
   if (m < 60) return `${m}m ago`;
@@ -9,9 +18,12 @@ export function relTime(iso: string): string {
 }
 
 export function clockTime(iso: string): string {
-  return new Date(iso).toISOString().slice(11, 19);
+  if (!iso) return "—";
+  return parseIso(iso).toISOString().slice(11, 19);
 }
 
 export function fullTime(iso: string): string {
-  return new Date(iso).toISOString().replace("T", " ").slice(0, 19) + "Z";
+  if (!iso) return "—";
+  return parseIso(iso).toISOString().replace("T", " ").slice(0, 19) + "Z";
 }
+
