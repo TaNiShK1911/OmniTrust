@@ -14,6 +14,24 @@ from app.config import settings
 logger = logging.getLogger("mock-logistics.webhook")
 
 
+import json
+import hmac
+import hashlib
+import httpx
+import time
+import uuid
+import logging
+from datetime import datetime, timezone
+from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
+from fastapi import BackgroundTasks
+from app.models.webhook_event import WebhookEvent
+from app.database import SessionLocal
+from app.config import settings
+
+logger = logging.getLogger("mock-logistics.webhook")
+
+
 def _sign(body: bytes, secret: str) -> str:
     return hmac.new(secret.encode("utf-8"), body, hashlib.sha256).hexdigest()
 
@@ -26,6 +44,7 @@ def create_and_send_webhook(
     goods_condition: str,
     damage_reason: str | None = None,
     idempotency_key: str | None = None,
+    background_tasks: BackgroundTasks | None = None,
 ) -> WebhookEvent:
     """Create a webhook event and attempt delivery. Idempotent if idempotency_key is provided."""
 
@@ -59,11 +78,14 @@ def create_and_send_webhook(
 
     # 2. Persist webhook event
     event = WebhookEvent(
+        id=event_id,
         tracking_id=tracking_id,
         event_type=status,
         payload=body.decode("utf-8"),
         signature=signature,
         idempotency_key=idem_key,
+        delivery_status="PENDING",
+        attempt_count=0,
     )
     db.add(event)
     try:
@@ -79,12 +101,16 @@ def create_and_send_webhook(
             return existing
         raise
 
-    # 3. Try sending (synchronous for now — could be backgrounded)
-    _dispatch_webhook(db, event)
+    # 3. Dispatch webhook in background if background_tasks provided, or synchronous
+    if background_tasks is not None:
+        background_tasks.add_task(_dispatch_webhook_by_id, event.id)
+    else:
+        _dispatch_webhook(db, event)
+        
     return event
 
 
-def retry_webhook(db: Session, event_id: str) -> WebhookEvent | None:
+def retry_webhook(db: Session, event_id: str, background_tasks: BackgroundTasks | None = None) -> WebhookEvent | None:
     event = db.query(WebhookEvent).filter(WebhookEvent.id == event_id).first()
     if not event:
         return None
@@ -96,8 +122,22 @@ def retry_webhook(db: Session, event_id: str) -> WebhookEvent | None:
     event.last_error = None
     db.commit()
     
-    _dispatch_webhook(db, event)
+    if background_tasks is not None:
+        background_tasks.add_task(_dispatch_webhook_by_id, event.id)
+    else:
+        _dispatch_webhook(db, event)
     return event
+
+
+def _dispatch_webhook_by_id(event_id: str):
+    """Background task runner with its own DB session."""
+    db = SessionLocal()
+    try:
+        event = db.query(WebhookEvent).filter(WebhookEvent.id == event_id).first()
+        if event:
+            _dispatch_webhook(db, event)
+    finally:
+        db.close()
 
 
 def _dispatch_webhook(db: Session, event: WebhookEvent):
@@ -106,15 +146,17 @@ def _dispatch_webhook(db: Session, event: WebhookEvent):
         "X-Logistics-Signature": event.signature
     }
     body = event.payload.encode("utf-8")
+    timeout_sec = min(getattr(settings, "webhook_timeout_seconds", 5), 5)
+    max_retries = min(getattr(settings, "webhook_max_retries", 3), 3)
 
-    delays = [1, 3]  # Attempt 1 -> 1s -> Attempt 2 -> 3s -> Attempt 3
+    delays = [0.5, 1.0]
 
-    while event.attempt_count < settings.webhook_max_retries:
+    while event.attempt_count < max_retries:
         event.attempt_count += 1
         db.commit()
 
         try:
-            with httpx.Client(timeout=settings.webhook_timeout_seconds) as client:
+            with httpx.Client(timeout=timeout_sec) as client:
                 res = client.post(settings.omnitrust_webhook_url, content=body, headers=headers)
                 event.response_code = res.status_code
                 db.commit()
@@ -140,7 +182,7 @@ def _dispatch_webhook(db: Session, event: WebhookEvent):
             db.commit()
             logger.warning(f"Webhook error: {event.tracking_id} -> {error_msg}")
 
-        if event.attempt_count < settings.webhook_max_retries:
-            # wait before next retry
+        if event.attempt_count < max_retries:
             delay_idx = min(event.attempt_count - 1, len(delays) - 1)
             time.sleep(delays[delay_idx])
+

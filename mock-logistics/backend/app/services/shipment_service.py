@@ -122,6 +122,7 @@ def deliver_shipment(
         status="DELIVERED",
         goods_condition=shipment.goods_condition,
         idempotency_key=idem_key,
+        background_tasks=background_tasks,
     )
     logger.info(f"Shipment delivered: {tracking_id}")
     return shipment
@@ -166,6 +167,7 @@ def damage_shipment(
         goods_condition="DAMAGED",
         damage_reason=damage_reason,
         idempotency_key=idem_key,
+        background_tasks=background_tasks,
     )
     logger.info(f"Shipment damaged: {tracking_id}")
     return shipment
