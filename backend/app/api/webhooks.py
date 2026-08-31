@@ -162,13 +162,14 @@ async def logistics_webhook(request: Request):
     delivered = status == "DELIVERED"
 
     # ── Step 6: Update shipment + order ──────────────────────────────────────
+    occurred_at_iso = occurred_at.isoformat() if occurred_at else occurred_at_str
     queries.update_shipment(
         db,
         shipment["id"],
         {
             "status": "delivered" if delivered else "damaged",
             "condition": "intact" if delivered else "damaged",
-            "last_event_at": occurred_at or None,
+            "last_event_at": occurred_at_iso,
         },
     )
     queries.update_order(
@@ -187,7 +188,7 @@ async def logistics_webhook(request: Request):
         entity=tracking_id,
         status="success" if delivered else "warning",
         decision="DELIVERED" if delivered else "DAMAGE_REPORTED",
-        payload={"condition": condition, "occurred_at": occurred_at},
+        payload={"condition": condition, "occurred_at": occurred_at_iso},
     )
 
     dispute_id: str | None = None
