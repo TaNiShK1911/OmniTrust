@@ -4,6 +4,7 @@ OmniTrust Backend — Security: Supabase JWT Verification
 Validates the Supabase-issued access token on every protected request.
 The JWT is verified locally against SUPABASE_JWT_SECRET (no network round-trip).
 """
+# Risk-gate test: authentication path review
 from typing import Any
 
 from jose import ExpiredSignatureError, JWTError, jwt
