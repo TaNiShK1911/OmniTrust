@@ -3,7 +3,14 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 
 import { ActionButton, AppShell } from "@/components/omni/AppShell";
-import { ApiState, GateChecks, LabelValue, MoneyCard, Panel, StatusBadge } from "@/components/omni/ui";
+import {
+  ApiState,
+  GateChecks,
+  LabelValue,
+  MoneyCard,
+  Panel,
+  StatusBadge,
+} from "@/components/omni/ui";
 import { POLICY_REFUND_CAP_PCT, inr, shortId } from "@/lib/omni";
 import { arbitrateDispute, fetchDispute, refundDispute } from "@/lib/omni.functions";
 
@@ -16,7 +23,10 @@ export const Route = createFileRoute("/_authenticated/disputes/$disputeId")({
         content: "Deterministic arbitration and a policy-capped refund for a damaged delivery.",
       },
       { property: "og:title", content: "Dispute arbitration — OmniTrust" },
-      { property: "og:description", content: "Deterministic arbitration with a policy-capped refund." },
+      {
+        property: "og:description",
+        content: "Deterministic arbitration with a policy-capped refund.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -46,7 +56,13 @@ function DisputeDetail() {
 
   const d = dispute.data;
   const order = d?.orders as
-    | { id: string; product_name: string; total_amount: number; status: string; refund_ref: string | null }
+    | {
+        id: string;
+        product_name: string;
+        total_amount: number;
+        status: string;
+        refund_ref: string | null;
+      }
     | undefined;
   const checks = runRefund.data?.checks ?? [];
 
@@ -67,7 +83,9 @@ function DisputeDetail() {
       }
     >
       {dispute.isLoading ? <ApiState loading /> : null}
-      {dispute.isError ? <ApiState error={dispute.error} onRetry={() => dispute.refetch()} /> : null}
+      {dispute.isError ? (
+        <ApiState error={dispute.error} onRetry={() => dispute.refetch()} />
+      ) : null}
 
       {d ? (
         <div className="grid gap-6 lg:grid-cols-3">
@@ -105,8 +123,8 @@ function DisputeDetail() {
                 </div>
               ) : (
                 <p className="text-sm text-muted-foreground">
-                  No decision yet. Arbitration is deterministic: damaged goods on a verified delivery produce a partial
-                  refund, never an arbitrary payout.
+                  No decision yet. Arbitration is deterministic: damaged goods on a verified
+                  delivery produce a partial refund, never an arbitrary payout.
                 </p>
               )}
               {d.reason ? <p className="mt-4 text-sm">{d.reason}</p> : null}
@@ -117,8 +135,8 @@ function DisputeDetail() {
                 <GateChecks checks={checks} />
               ) : (
                 <p className="text-sm text-muted-foreground">
-                  Executing the refund evaluates the arbitration state, the refund cap and double-refund protection
-                  before any money moves.
+                  Executing the refund evaluates the arbitration state, the refund cap and
+                  double-refund protection before any money moves.
                 </p>
               )}
               {runRefund.data && !runRefund.data.ok ? (

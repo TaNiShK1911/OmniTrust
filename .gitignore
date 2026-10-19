@@ -34,6 +34,8 @@ Thumbs.db
 !tsconfig.json
 !components.json
 !vercel.json
+!api/openapi.json
+!frontend/public/openapi.json
 
 # Scratch
 scratch/

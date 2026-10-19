@@ -9,7 +9,8 @@ import { safePath } from "@/lib/omni";
 type Search = { mode?: "signin" | "signup"; next?: string | undefined };
 
 const TITLE = "Sign in — OmniTrust settlement console";
-const DESC = "Access the OmniTrust console: bounded agent negotiation, escrow, shipment verification and audit.";
+const DESC =
+  "Access the OmniTrust console: bounded agent negotiation, escrow, shipment verification and audit.";
 
 export const Route = createFileRoute("/auth")({
   validateSearch: (search: Record<string, unknown>): Search => ({
@@ -210,7 +211,9 @@ Settlement            SELLER_PAID`}</pre>
                         type="button"
                         onClick={() => setRole(r)}
                         className={`label-mono flex-1 px-3 py-2.5 ${
-                          role === r ? "bg-primary text-primary-foreground" : "bg-background text-muted-foreground"
+                          role === r
+                            ? "bg-primary text-primary-foreground"
+                            : "bg-background text-muted-foreground"
                         }`}
                       >
                         {r}
@@ -278,7 +281,9 @@ Settlement            SELLER_PAID`}</pre>
             ) : null}
 
             {error ? (
-              <p className="border border-destructive bg-destructive/5 px-3 py-2 text-sm text-destructive">{error}</p>
+              <p className="border border-destructive bg-destructive/5 px-3 py-2 text-sm text-destructive">
+                {error}
+              </p>
             ) : null}
 
             <button

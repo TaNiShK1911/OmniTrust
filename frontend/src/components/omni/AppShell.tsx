@@ -38,7 +38,9 @@ export function AppShell({
           <Link to="/dashboard" className="font-display text-lg font-bold tracking-tight">
             Omni<span className="text-terminal">Trust</span>
           </Link>
-          <span className="label-mono border border-terminal px-2 py-1 text-terminal">PayPal Sandbox</span>
+          <span className="label-mono border border-terminal px-2 py-1 text-terminal">
+            PayPal Sandbox
+          </span>
           <nav className="order-3 flex w-full flex-wrap gap-1 md:order-none md:w-auto">
             {NAV.map((item) => (
               <Link
@@ -53,7 +55,10 @@ export function AppShell({
             ))}
           </nav>
           <div className="ml-auto flex items-center gap-2">
-            <button onClick={signOut} className="label-mono border border-navy-border px-3 py-2 hover:bg-white/5">
+            <button
+              onClick={signOut}
+              className="label-mono border border-navy-border px-3 py-2 hover:bg-white/5"
+            >
               Sign out
             </button>
           </div>

@@ -5,7 +5,11 @@ import { useServerFn } from "@tanstack/react-start";
 import { ActionButton, AppShell } from "@/components/omni/AppShell";
 import { ApiState, LabelValue, Panel, StatusBadge } from "@/components/omni/ui";
 import { CATEGORY_LABEL, inr, shortId, timeOf } from "@/lib/omni";
-import { fetchCommandCenterTelemetry, fetchDashboard, fetchDependencies } from "@/lib/omni.functions";
+import {
+  fetchCommandCenterTelemetry,
+  fetchDashboard,
+  fetchDependencies,
+} from "@/lib/omni.functions";
 import { AgentAuditGrid } from "@/components/audit/AgentAuditGrid";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
@@ -14,10 +18,14 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
       { title: "Dashboard — OmniTrust settlement console" },
       {
         name: "description",
-        content: "Live view of negotiations, escrow, shipments, settlements and disputes across your account.",
+        content:
+          "Live view of negotiations, escrow, shipments, settlements and disputes across your account.",
       },
       { property: "og:title", content: "Dashboard — OmniTrust settlement console" },
-      { property: "og:description", content: "Live view of negotiations, escrow, shipments and settlements." },
+      {
+        property: "og:description",
+        content: "Live view of negotiations, escrow, shipments and settlements.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -30,20 +38,33 @@ function Dashboard() {
   const deps = useServerFn(fetchDependencies);
   const loadTelemetry = useServerFn(fetchCommandCenterTelemetry);
 
-  const snapshot = useQuery({ queryKey: ["dashboard"], queryFn: () => load(), refetchInterval: 4000 });
+  const snapshot = useQuery({
+    queryKey: ["dashboard"],
+    queryFn: () => load(),
+    refetchInterval: 4000,
+  });
   const dependencies = useQuery({ queryKey: ["dependencies"], queryFn: () => deps() });
-  const telemetry = useQuery({ queryKey: ["telemetry"], queryFn: () => loadTelemetry(), refetchInterval: 5000 });
+  const telemetry = useQuery({
+    queryKey: ["telemetry"],
+    queryFn: () => loadTelemetry(),
+    refetchInterval: 5000,
+  });
 
   const orders = snapshot.data?.orders ?? [];
   const negotiations = snapshot.data?.negotiations ?? [];
   const events = snapshot.data?.events ?? [];
 
   const kpis = [
-    { label: "Active negotiations", value: negotiations.filter((n) => n.status === "active").length },
+    {
+      label: "Active negotiations",
+      value: negotiations.filter((n) => n.status === "active").length,
+    },
     { label: "Orders in escrow", value: orders.filter((o) => o.escrow_status === "held").length },
     {
       label: "In-transit shipments",
-      value: orders.filter((o) => (o.shipments as { status: string }[])?.[0]?.status === "registered").length,
+      value: orders.filter(
+        (o) => (o.shipments as { status: string }[])?.[0]?.status === "registered",
+      ).length,
     },
     { label: "Settled orders", value: orders.filter((o) => o.status === "settled").length },
     {
@@ -62,7 +83,10 @@ function Dashboard() {
       subtitle="Everything the deterministic backend allowed, in order."
       actions={
         <>
-          <Link to="/catalog" className="label-mono lift bg-primary px-4 py-2.5 text-primary-foreground">
+          <Link
+            to="/catalog"
+            className="label-mono lift bg-primary px-4 py-2.5 text-primary-foreground"
+          >
             Start new negotiation →
           </Link>
           {latest ? (
@@ -111,7 +135,8 @@ function Dashboard() {
             Agentic Audit Command Center
           </h2>
           <p className="text-xs text-muted-foreground">
-            Operator-facing AG Grid with consensus scores, deterministic release gates, and PayPal authorization states.
+            Operator-facing AG Grid with consensus scores, deterministic release gates, and PayPal
+            authorization states.
           </p>
         </div>
         <AgentAuditGrid
@@ -132,16 +157,23 @@ function Dashboard() {
               <table className="w-full border-collapse text-sm">
                 <thead>
                   <tr className="border-b border-border">
-                    {["Order", "Product", "Qty", "Total", "Escrow", "Shipment", "Status"].map((h) => (
-                      <th key={h} className="label-mono px-3 py-2 text-left text-muted-foreground">
-                        {h}
-                      </th>
-                    ))}
+                    {["Order", "Product", "Qty", "Total", "Escrow", "Shipment", "Status"].map(
+                      (h) => (
+                        <th
+                          key={h}
+                          className="label-mono px-3 py-2 text-left text-muted-foreground"
+                        >
+                          {h}
+                        </th>
+                      ),
+                    )}
                   </tr>
                 </thead>
                 <tbody>
                   {orders.map((o) => {
-                    const shipment = (o.shipments as { status: string; tracking_id: string }[])?.[0];
+                    const shipment = (
+                      o.shipments as { status: string; tracking_id: string }[]
+                    )?.[0];
                     return (
                       <tr key={o.id} className="border-b border-border hover:bg-muted">
                         <td className="px-3 py-2">
@@ -192,7 +224,9 @@ function Dashboard() {
               ) : (
                 events.map((e) => (
                   <li key={e.id} className="flex items-start gap-3 px-4 py-3">
-                    <span className="mono-id shrink-0 text-muted-foreground">{timeOf(e.created_at)}</span>
+                    <span className="mono-id shrink-0 text-muted-foreground">
+                      {timeOf(e.created_at)}
+                    </span>
                     <div>
                       <p className="text-sm">
                         <span className="font-medium">{e.actor}</span>{" "}
@@ -211,13 +245,22 @@ function Dashboard() {
 
           <Panel title="Dependencies">
             <div className="space-y-3">
-              {(dependencies.data?.checks ?? []).map((d: any) => (
-                <div key={d.name} className="flex items-center justify-between gap-3">
-                  <LabelValue label={d.name} value={d.detail} />
-                  <StatusBadge status={d.ok ? "healthy" : "failed"} tone={d.ok ? "success" : "failed"} />
-                </div>
-              ))}
-              <ActionButton variant="ghost" onClick={() => dependencies.refetch()} className="w-full">
+              {(dependencies.data?.checks ?? []).map(
+                (d: { name: string; detail: string; ok: boolean }) => (
+                  <div key={d.name} className="flex items-center justify-between gap-3">
+                    <LabelValue label={d.name} value={d.detail} />
+                    <StatusBadge
+                      status={d.ok ? "healthy" : "failed"}
+                      tone={d.ok ? "success" : "failed"}
+                    />
+                  </div>
+                ),
+              )}
+              <ActionButton
+                variant="ghost"
+                onClick={() => dependencies.refetch()}
+                className="w-full"
+              >
                 Re-check dependencies
               </ActionButton>
             </div>

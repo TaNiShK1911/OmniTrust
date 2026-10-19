@@ -19,16 +19,14 @@ This directory contains the versioned OpenAPI 3.0 specification for OmniTrust.
 
 ## Regenerating the Specification
 
-To regenerate `openapi.json` from the running FastAPI application:
+To regenerate `openapi.json` from the FastAPI application schemas:
 
-```powershell
+```bash
 cd backend
-$env:SUPABASE_URL="https://example.supabase.co"
-$env:SUPABASE_ANON_KEY="dummy"
-$env:SUPABASE_SERVICE_ROLE_KEY="dummy"
-$env:SUPABASE_JWT_SECRET="dummy"
-python -c "import json, os; from app.main import create_app; spec = create_app().openapi(); open('../api/openapi.json', 'w').write(json.dumps(spec, indent=2))"
+python generate_openapi.py
 ```
+
+This exports the complete OpenAPI 3.1.0 schema directly to `api/openapi.json` with 46 routes and Pydantic request/response models.
 
 ## Generating SDKs with APIMatic
 

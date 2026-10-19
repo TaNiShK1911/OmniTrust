@@ -3,6 +3,7 @@ import { getRequest } from "@tanstack/react-start/server";
 
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import * as api from "./omni-db.server";
+import { AuditSessionSummary } from "./audit.types";
 
 export type Profile = {
   full_name: string;
@@ -32,7 +33,7 @@ export type NegotiationSession = {
   target_discount_pct: number;
   status: string;
   created_at: string;
-  turns: any[];
+  turns: unknown[];
   orderId?: string;
   order_id: string;
   product?: Product;
@@ -51,7 +52,7 @@ export type Shipment = {
   status: string;
   condition: string;
   created_at: string;
-  orders?: any;
+  orders?: Record<string, unknown>;
 };
 
 export type Dispute = {
@@ -61,8 +62,8 @@ export type Dispute = {
   status: string;
   resolution?: string;
   created_at: string;
-  orders?: any;
-  checks?: any[];
+  orders?: Record<string, unknown>;
+  checks?: unknown[];
   refund_amount?: number;
   penalty_pct?: number;
   decision?: string;
@@ -74,7 +75,7 @@ export type AuditLog = {
   id: string;
   event_type: string;
   order_id?: string;
-  details: any;
+  details: Record<string, unknown>;
   created_at: string;
   category?: string;
   actor?: string;
@@ -82,7 +83,7 @@ export type AuditLog = {
   decision?: string;
   entity?: string;
   request_id?: string;
-  payload?: any;
+  payload?: Record<string, unknown>;
   status: string;
 };
 
@@ -107,7 +108,7 @@ export type Order = {
   updated_at: string;
   shipments?: Shipment[];
   disputes?: Dispute[];
-  checks?: any[];
+  checks?: unknown[];
   ok?: boolean;
 };
 
@@ -145,7 +146,6 @@ export type AuthorizePayPalOrderResult = {
   message?: string;
 };
 
-
 const BACKEND_URL = process.env["BACKEND_URL"] ?? "http://localhost:8000";
 
 async function backendFetch<T>(
@@ -166,14 +166,24 @@ async function backendFetch<T>(
     headers,
     body: body !== undefined ? JSON.stringify(body) : undefined,
   });
-  
+
   if (res.status === 204) {
     return {} as T;
   }
 
-  let json: any;
+  let json: {
+    success?: boolean;
+    data?: T;
+    detail?: string | { message?: string };
+    error?: { message?: string };
+  };
   try {
-    json = await res.json();
+    json = (await res.json()) as {
+      success?: boolean;
+      data?: T;
+      detail?: string | { message?: string };
+      error?: { message?: string };
+    };
   } catch {
     throw new Error(`Backend error ${res.status}: Invalid JSON response`);
   }
@@ -185,7 +195,7 @@ async function backendFetch<T>(
       `Backend error ${res.status}`;
     throw new Error(errorMsg);
   }
-  return (json.data !== undefined ? json.data : json) as T;
+  return (json.data !== undefined ? json.data : (json as unknown as T)) as T;
 }
 
 function getToken(): string {
@@ -231,13 +241,15 @@ export const listProducts = createServerFn({ method: "GET" })
 
 export const startNegotiation = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((input: { productId: string; quantity: number; targetDiscountPct: number }) => input)
+  .inputValidator(
+    (input: { productId: string; quantity: number; targetDiscountPct: number }) => input,
+  )
   .handler(async ({ data }) => {
     // Map frontend names to backend expected names
     const payload = {
-        product_id: data.productId,
-        quantity: data.quantity,
-        target_discount_pct: data.targetDiscountPct
+      product_id: data.productId,
+      quantity: data.quantity,
+      target_discount_pct: data.targetDiscountPct,
     };
     return backendFetch<NegotiationSession>("POST", "/api/v1/negotiations", getToken(), payload);
   });
@@ -246,7 +258,11 @@ export const fetchNegotiation = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { id: string }) => input)
   .handler(async ({ data }) => {
-    const negotiation = await backendFetch<NegotiationSession>("GET", `/api/v1/negotiations/${data.id}`, getToken());
+    const negotiation = await backendFetch<NegotiationSession>(
+      "GET",
+      `/api/v1/negotiations/${data.id}`,
+      getToken(),
+    );
     return { negotiation, aiError: null };
   });
 
@@ -254,14 +270,22 @@ export const advanceNegotiation = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { id: string }) => input)
   .handler(async ({ data }) => {
-    return backendFetch<NegotiationSession>("POST", `/api/v1/negotiations/${data.id}/next-turn`, getToken());
+    return backendFetch<NegotiationSession>(
+      "POST",
+      `/api/v1/negotiations/${data.id}/next-turn`,
+      getToken(),
+    );
   });
 
 export const approveNegotiation = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { id: string }) => input)
   .handler(async ({ data }) => {
-    return backendFetch<NegotiationSession>("POST", `/api/v1/negotiations/${data.id}/approve`, getToken());
+    return backendFetch<NegotiationSession>(
+      "POST",
+      `/api/v1/negotiations/${data.id}/approve`,
+      getToken(),
+    );
   });
 
 export const fetchOrders = createServerFn({ method: "GET" })
@@ -292,16 +316,25 @@ export const createPayPalOrder = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { orderId: string }) => input)
   .handler(async ({ data }) => {
-    return backendFetch<CreatePayPalOrderResult>("POST", `/api/v1/orders/${data.orderId}/paypal-order`, getToken());
+    return backendFetch<CreatePayPalOrderResult>(
+      "POST",
+      `/api/v1/orders/${data.orderId}/paypal-order`,
+      getToken(),
+    );
   });
 
 export const authorizePayPalOrder = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { orderId: string; paypalOrderId: string }) => input)
   .handler(async ({ data }) => {
-    return backendFetch<AuthorizePayPalOrderResult>("POST", `/api/v1/orders/${data.orderId}/authorize`, getToken(), {
-      paypal_order_id: data.paypalOrderId,
-    });
+    return backendFetch<AuthorizePayPalOrderResult>(
+      "POST",
+      `/api/v1/orders/${data.orderId}/authorize`,
+      getToken(),
+      {
+        paypal_order_id: data.paypalOrderId,
+      },
+    );
   });
 
 export const fetchPaymentStatus = createServerFn({ method: "POST" })
@@ -338,7 +371,6 @@ export const fetchShipment = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     return backendFetch<Shipment>("GET", `/api/v1/shipments/${data.tracking}`, getToken());
   });
-
 
 export const settleOrder = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -385,11 +417,10 @@ export const resetDemoData = createServerFn({ method: "POST" })
 export const fetchDependencies = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async () => {
-    const res = await backendFetch<{ all_healthy: boolean; checks: any[] }>(
-        "GET",
-        "/api/health/dependencies",
-        getToken(),
-    );
+    const res = await backendFetch<{
+      all_healthy: boolean;
+      checks: { name: string; ok: boolean; detail: string }[];
+    }>("GET", "/api/health/dependencies", getToken());
     return { ok: true, ...res };
   });
 
@@ -398,18 +429,21 @@ export const advanceNegotiationViaBackend = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { id: string }) => input)
   .handler(async ({ data }) => {
-    const result = await backendFetch<NegotiationSession>("POST", `/api/v1/negotiations/${data.id}/next-turn`, getToken());
+    const result = await backendFetch<NegotiationSession>(
+      "POST",
+      `/api/v1/negotiations/${data.id}/next-turn`,
+      getToken(),
+    );
     return { result, via: "fastapi" };
   });
 
 export const fetchBackendHealth = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async () => {
-    const result = await backendFetch<{ all_healthy: boolean; checks: any[] }>(
-      "GET",
-      "/api/health/dependencies",
-      getToken(),
-    );
+    const result = await backendFetch<{
+      all_healthy: boolean;
+      checks: { name: string; ok: boolean; detail: string }[];
+    }>("GET", "/api/health/dependencies", getToken());
     return { ok: true, ...result };
   });
 
@@ -418,5 +452,5 @@ export const fetchAuditViaBackend = fetchAudit;
 export const fetchCommandCenterTelemetry = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async () => {
-    return backendFetch<any[]>("GET", "/api/audit/command-center", getToken());
+    return backendFetch<AuditSessionSummary[]>("GET", "/api/audit/command-center", getToken());
   });

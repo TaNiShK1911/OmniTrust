@@ -96,7 +96,10 @@ export async function saveProfile(
 /* --------------------------------- catalog ---------------------------------- */
 
 export async function listProducts(db: DB) {
-  const { data, error } = await db.from("products").select("*").order("list_price", { ascending: true });
+  const { data, error } = await db
+    .from("products")
+    .select("*")
+    .order("list_price", { ascending: true });
   if (error) throw new Error(error.message);
   return data;
 }
@@ -426,7 +429,8 @@ export async function createEscrow(db: DB, userId: string, orderId: string) {
 
 export async function createShipment(db: DB, userId: string, orderId: string) {
   const order = await getOrder(db, orderId);
-  if (order.escrow_status !== "held") throw new Error("Escrow must be held before shipment registration.");
+  if (order.escrow_status !== "held")
+    throw new Error("Escrow must be held before shipment registration.");
   const existing = (order.shipments as { id: string; tracking_id: string }[])?.[0];
   if (existing) return existing;
 
@@ -516,7 +520,11 @@ export async function settleOrder(db: DB, userId: string, orderId: string) {
 }
 
 export async function getDispute(db: DB, id: string) {
-  const { data, error } = await db.from("disputes").select("*, orders(*)").eq("id", id).maybeSingle();
+  const { data, error } = await db
+    .from("disputes")
+    .select("*, orders(*)")
+    .eq("id", id)
+    .maybeSingle();
   if (error) throw new Error(error.message);
   return must(data, "Dispute not found");
 }
@@ -590,7 +598,12 @@ export async function runRefund(db: DB, userId: string, disputeId: string) {
   const ref = providerRef("rfnd");
   await db
     .from("orders")
-    .update({ status: "refunded", escrow_status: "refunded", refund_ref: ref, refund_amount: amount })
+    .update({
+      status: "refunded",
+      escrow_status: "refunded",
+      refund_ref: ref,
+      refund_amount: amount,
+    })
     .eq("id", order.id);
   const { data, error } = await db
     .from("disputes")
@@ -618,7 +631,11 @@ export async function runRefund(db: DB, userId: string, disputeId: string) {
 /* ----------------------------------- audit ---------------------------------- */
 
 export async function listAudit(db: DB, orderId?: string | null, limit = 200) {
-  let query = db.from("audit_events").select("*").order("created_at", { ascending: true }).limit(limit);
+  let query = db
+    .from("audit_events")
+    .select("*")
+    .order("created_at", { ascending: true })
+    .limit(limit);
   if (orderId) query = query.eq("order_id", orderId);
   const { data, error } = await query;
   if (error) throw new Error(error.message);
@@ -628,7 +645,11 @@ export async function listAudit(db: DB, orderId?: string | null, limit = 200) {
 export async function dashboardSnapshot(db: DB) {
   const [orders, negotiations, events] = await Promise.all([
     listOrders(db),
-    db.from("negotiations").select("*, product:products(name)").order("created_at", { ascending: false }).limit(10),
+    db
+      .from("negotiations")
+      .select("*, product:products(name)")
+      .order("created_at", { ascending: false })
+      .limit(10),
     db.from("audit_events").select("*").order("created_at", { ascending: false }).limit(12),
   ]);
   return {
@@ -653,7 +674,9 @@ export async function dependencyStatus(): Promise<{ name: string; ok: boolean; d
     {
       name: "AI provider",
       ok: Boolean(process.env["GATEWAY_API_KEY"]),
-      detail: process.env["GATEWAY_API_KEY"] ? "Gateway reachable" : "Key missing — deterministic fallback",
+      detail: process.env["GATEWAY_API_KEY"]
+        ? "Gateway reachable"
+        : "Key missing — deterministic fallback",
     },
     { name: "Payment provider", ok: true, detail: "Test mode simulator, server-side only" },
     {

@@ -22,7 +22,9 @@ export function AgentDetailPanel({ row, onClose }: AgentDetailPanelProps) {
     return (
       <div className="flex h-full flex-col items-center justify-center p-8 text-center text-muted-foreground">
         <Shield className="mb-2 h-8 w-8 text-muted-foreground/40" />
-        <p className="text-sm font-medium">Select an order in the grid to inspect agentic decision telemetry</p>
+        <p className="text-sm font-medium">
+          Select an order in the grid to inspect agentic decision telemetry
+        </p>
       </div>
     );
   }
@@ -37,7 +39,9 @@ export function AgentDetailPanel({ row, onClose }: AgentDetailPanelProps) {
     <div className="space-y-4 rounded-lg border border-border bg-card/80 p-5 shadow-sm backdrop-blur-md">
       <div className="flex items-center justify-between border-b border-border/80 pb-3">
         <div>
-          <span className="text-xs uppercase tracking-wider text-muted-foreground">Order Telemetry</span>
+          <span className="text-xs uppercase tracking-wider text-muted-foreground">
+            Order Telemetry
+          </span>
           <h3 className="font-mono text-sm font-semibold text-foreground flex items-center gap-2">
             {row.order_id}
             <button
@@ -45,7 +49,11 @@ export function AgentDetailPanel({ row, onClose }: AgentDetailPanelProps) {
               className="text-muted-foreground hover:text-foreground"
               title="Copy Order ID"
             >
-              {copiedField === "order_id" ? <Check className="h-3.5 w-3.5 text-primary" /> : <Copy className="h-3.5 w-3.5" />}
+              {copiedField === "order_id" ? (
+                <Check className="h-3.5 w-3.5 text-primary" />
+              ) : (
+                <Copy className="h-3.5 w-3.5" />
+              )}
             </button>
           </h3>
         </div>
@@ -61,7 +69,9 @@ export function AgentDetailPanel({ row, onClose }: AgentDetailPanelProps) {
       <div className="grid grid-cols-2 gap-3 text-xs">
         <div className="rounded border border-border/50 bg-background/50 p-2.5">
           <span className="text-muted-foreground block text-[11px]">Consensus Score</span>
-          <span className="text-base font-semibold text-primary">{row.consensus_score_pct.toFixed(1)}%</span>
+          <span className="text-base font-semibold text-primary">
+            {row.consensus_score_pct.toFixed(1)}%
+          </span>
         </div>
         <div className="rounded border border-border/50 bg-background/50 p-2.5">
           <span className="text-muted-foreground block text-[11px]">Payment State</span>
@@ -76,11 +86,15 @@ export function AgentDetailPanel({ row, onClose }: AgentDetailPanelProps) {
         </div>
         <div className="flex justify-between border-b border-border/40 py-1.5">
           <span className="text-muted-foreground">Buyer Bid vs Seller Ask</span>
-          <span className="font-mono text-foreground">${row.buyer_bid.toFixed(2)} / ${row.seller_counteroffer.toFixed(2)}</span>
+          <span className="font-mono text-foreground">
+            ${row.buyer_bid.toFixed(2)} / ${row.seller_counteroffer.toFixed(2)}
+          </span>
         </div>
         <div className="flex justify-between border-b border-border/40 py-1.5">
           <span className="text-muted-foreground">Agreed Total</span>
-          <span className="font-mono font-semibold text-foreground">${row.total_amount.toFixed(2)} {row.currency}</span>
+          <span className="font-mono font-semibold text-foreground">
+            ${row.total_amount.toFixed(2)} {row.currency}
+          </span>
         </div>
         <div className="flex justify-between border-b border-border/40 py-1.5">
           <span className="text-muted-foreground">PayPal Authorization</span>
@@ -88,7 +102,11 @@ export function AgentDetailPanel({ row, onClose }: AgentDetailPanelProps) {
             {row.authorization_id ? row.authorization_id : "None"}
             {row.authorization_id && (
               <button onClick={() => copyToClipboard(row.authorization_id!, "auth_id")}>
-                {copiedField === "auth_id" ? <Check className="h-3 w-3 text-primary" /> : <Copy className="h-3 w-3" />}
+                {copiedField === "auth_id" ? (
+                  <Check className="h-3 w-3 text-primary" />
+                ) : (
+                  <Copy className="h-3 w-3" />
+                )}
               </button>
             )}
           </span>
@@ -99,7 +117,11 @@ export function AgentDetailPanel({ row, onClose }: AgentDetailPanelProps) {
             {row.capture_id ? row.capture_id : "Not yet captured"}
             {row.capture_id && (
               <button onClick={() => copyToClipboard(row.capture_id!, "cap_id")}>
-                {copiedField === "cap_id" ? <Check className="h-3 w-3 text-primary" /> : <Copy className="h-3 w-3" />}
+                {copiedField === "cap_id" ? (
+                  <Check className="h-3 w-3 text-primary" />
+                ) : (
+                  <Copy className="h-3 w-3" />
+                )}
               </button>
             )}
           </span>
@@ -116,7 +138,9 @@ export function AgentDetailPanel({ row, onClose }: AgentDetailPanelProps) {
           <span>Deterministic Gate Enforcement</span>
         </div>
         <p className="text-muted-foreground leading-relaxed text-[11px]">
-          Agents autonomously negotiated pricing within configured spend caps. Money movement is strictly gated: funds remain in conditional PayPal authorization hold until delivery proof and non-dispute gates verify release.
+          Agents autonomously negotiated pricing within configured spend caps. Money movement is
+          strictly gated: funds remain in conditional PayPal authorization hold until delivery proof
+          and non-dispute gates verify release.
         </p>
       </div>
     </div>

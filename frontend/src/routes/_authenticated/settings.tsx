@@ -6,7 +6,12 @@ import { useEffect, useState } from "react";
 import { ActionButton, AppShell } from "@/components/omni/AppShell";
 import { ApiState, LabelValue, Panel, StatusBadge } from "@/components/omni/ui";
 import { MAX_TURNS, POLICY_REFUND_CAP_PCT } from "@/lib/omni";
-import { fetchDependencies, getMyProfile, resetDemoData, saveMyProfile } from "@/lib/omni.functions";
+import {
+  fetchDependencies,
+  getMyProfile,
+  resetDemoData,
+  saveMyProfile,
+} from "@/lib/omni.functions";
 
 export const Route = createFileRoute("/_authenticated/settings")({
   head: () => ({
@@ -66,7 +71,10 @@ function Settings() {
   });
 
   return (
-    <AppShell title="Settings" subtitle="Profile, policy constants, dependency health and data controls.">
+    <AppShell
+      title="Settings"
+      subtitle="Profile, policy constants, dependency health and data controls."
+    >
       <div className="grid gap-6 lg:grid-cols-3">
         <div className="space-y-6 lg:col-span-2">
           <Panel title="Profile">
@@ -105,7 +113,9 @@ function Settings() {
                         type="button"
                         onClick={() => setRole(r)}
                         className={`label-mono flex-1 px-3 py-2.5 ${
-                          role === r ? "bg-primary text-primary-foreground" : "bg-background text-muted-foreground"
+                          role === r
+                            ? "bg-primary text-primary-foreground"
+                            : "bg-background text-muted-foreground"
                         }`}
                       >
                         {r}
@@ -124,12 +134,16 @@ function Settings() {
           <Panel title="Policy constants (server-enforced)">
             <div className="grid gap-4 sm:grid-cols-3">
               <LabelValue label="Negotiation turn cap" value={`${MAX_TURNS} turns`} mono />
-              <LabelValue label="Refund cap" value={`${POLICY_REFUND_CAP_PCT}% of order total`} mono />
+              <LabelValue
+                label="Refund cap"
+                value={`${POLICY_REFUND_CAP_PCT}% of order total`}
+                mono
+              />
               <LabelValue label="Price floor visibility" value="Hidden from both agents" />
             </div>
             <p className="mt-4 text-sm text-muted-foreground">
-              These constants live in server code, not in the browser, so editing anything client-side cannot widen a
-              guardrail.
+              These constants live in server code, not in the browser, so editing anything
+              client-side cannot widen a guardrail.
             </p>
           </Panel>
         </div>
@@ -137,13 +151,22 @@ function Settings() {
         <div className="space-y-6">
           <Panel title="Dependency health">
             <div className="space-y-3">
-              {(dependencies.data?.checks ?? []).map((d: any) => (
-                <div key={d.name} className="flex items-center justify-between gap-3">
-                  <LabelValue label={d.name} value={d.detail} />
-                  <StatusBadge status={d.ok ? "healthy" : "failed"} tone={d.ok ? "success" : "failed"} />
-                </div>
-              ))}
-              <ActionButton variant="ghost" onClick={() => dependencies.refetch()} className="w-full">
+              {(dependencies.data?.checks ?? []).map(
+                (d: { name: string; detail: string; ok: boolean }) => (
+                  <div key={d.name} className="flex items-center justify-between gap-3">
+                    <LabelValue label={d.name} value={d.detail} />
+                    <StatusBadge
+                      status={d.ok ? "healthy" : "failed"}
+                      tone={d.ok ? "success" : "failed"}
+                    />
+                  </div>
+                ),
+              )}
+              <ActionButton
+                variant="ghost"
+                onClick={() => dependencies.refetch()}
+                className="w-full"
+              >
                 Re-check
               </ActionButton>
             </div>
@@ -151,8 +174,8 @@ function Settings() {
 
           <Panel title="Reset account data">
             <p className="text-sm text-muted-foreground">
-              Deletes your negotiations, orders, shipments, disputes and audit events. The shared product catalog is
-              untouched.
+              Deletes your negotiations, orders, shipments, disputes and audit events. The shared
+              product catalog is untouched.
             </p>
             {resetDemo.isError ? (
               <div className="mt-3">

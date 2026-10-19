@@ -14,10 +14,14 @@ export const Route = createFileRoute("/_authenticated/audit/$orderId")({
       { title: "Audit trail — OmniTrust" },
       {
         name: "description",
-        content: "Append-only evidence for every agent proposal, guardrail decision, payment and webhook.",
+        content:
+          "Append-only evidence for every agent proposal, guardrail decision, payment and webhook.",
       },
       { property: "og:title", content: "Audit trail — OmniTrust" },
-      { property: "og:description", content: "Append-only evidence for the whole settlement workflow." },
+      {
+        property: "og:description",
+        content: "Append-only evidence for the whole settlement workflow.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -101,7 +105,9 @@ function Audit() {
                     <span className="label-mono text-muted-foreground">{e.actor}</span>
                   </span>
                   <span className="flex items-center gap-2">
-                    {e.latency_ms ? <span className="mono-id text-muted-foreground">{e.latency_ms}ms</span> : null}
+                    {e.latency_ms ? (
+                      <span className="mono-id text-muted-foreground">{e.latency_ms}ms</span>
+                    ) : null}
                     {e.decision ? <span className="mono-id">{e.decision}</span> : null}
                     <StatusBadge status={e.status} />
                   </span>
@@ -113,7 +119,9 @@ function Audit() {
                         Category · {CATEGORY_LABEL[e.category as AuditCategory] ?? e.category}
                       </p>
                       <p className="label-mono text-muted-foreground">Entity · {e.entity ?? "—"}</p>
-                      <p className="label-mono text-muted-foreground">Request · {e.request_id ?? "—"}</p>
+                      <p className="label-mono text-muted-foreground">
+                        Request · {e.request_id ?? "—"}
+                      </p>
                     </div>
                     <JsonBlock value={e.payload} />
                   </div>

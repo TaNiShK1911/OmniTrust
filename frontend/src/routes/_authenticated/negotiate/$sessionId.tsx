@@ -13,10 +13,14 @@ export const Route = createFileRoute("/_authenticated/negotiate/$sessionId")({
       { title: "Agent negotiation — OmniTrust" },
       {
         name: "description",
-        content: "Watch the buyer agent propose, the deterministic gatekeeper rule, and the seller agent counter.",
+        content:
+          "Watch the buyer agent propose, the deterministic gatekeeper rule, and the seller agent counter.",
       },
       { property: "og:title", content: "Agent negotiation — OmniTrust" },
-      { property: "og:description", content: "Bounded, four-turn agent negotiation with a deterministic gatekeeper." },
+      {
+        property: "og:description",
+        content: "Bounded, four-turn agent negotiation with a deterministic gatekeeper.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -57,16 +61,14 @@ function Negotiate() {
       subtitle={`Session ${shortId(sessionId)} · hard cap of ${n?.max_turns ?? 4} turns`}
     >
       {session.isLoading ? <ApiState loading /> : null}
-      {session.isError ? <ApiState error={session.error} onRetry={() => session.refetch()} /> : null}
+      {session.isError ? (
+        <ApiState error={session.error} onRetry={() => session.refetch()} />
+      ) : null}
 
       {n ? (
         <div className="grid gap-6 lg:grid-cols-3">
           <div className="space-y-6 lg:col-span-2">
-            <Panel
-              title="Turn transcript"
-              action={<StatusBadge status={n.status} />}
-              dense
-            >
+            <Panel title="Turn transcript" action={<StatusBadge status={n.status} />} dense>
               <ul className="divide-y divide-border">
                 {turns.length === 0 ? (
                   <li className="p-6 text-sm text-muted-foreground">
@@ -99,8 +101,8 @@ function Negotiate() {
             {aiError ? (
               <Panel title="AI provider notice">
                 <p className="text-sm text-muted-foreground">
-                  The model call failed ({aiError}). The deterministic fallback proposer was used instead, so the
-                  negotiation still completes with the same policy checks.
+                  The model call failed ({aiError}). The deterministic fallback proposer was used
+                  instead, so the negotiation still completes with the same policy checks.
                 </p>
               </Panel>
             ) : null}
@@ -148,7 +150,8 @@ function Negotiate() {
 
                 {n.status === "expired" ? (
                   <p className="text-sm text-muted-foreground">
-                    Turn budget exhausted with no agreement. No order was created — that is the intended guardrail.
+                    Turn budget exhausted with no agreement. No order was created — that is the
+                    intended guardrail.
                   </p>
                 ) : null}
                 {n.status === "approved" ? (

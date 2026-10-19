@@ -52,7 +52,7 @@ export async function proposeWithAI(input: ProposalInput): Promise<{
           {
             role: "system",
             content:
-              "You are a procurement Buyer Agent in a bounded B2B negotiation. Reply ONLY with compact JSON: {\"unit_price\": number, \"rationale\": string}. The rationale must be under 160 characters. You do not know the seller's price floor.",
+              'You are a procurement Buyer Agent in a bounded B2B negotiation. Reply ONLY with compact JSON: {"unit_price": number, "rationale": string}. The rationale must be under 160 characters. You do not know the seller\'s price floor.',
           },
           {
             role: "user",
@@ -65,7 +65,9 @@ export async function proposeWithAI(input: ProposalInput): Promise<{
     const json = (await res.json()) as { choices?: { message?: { content?: string } }[] };
     const raw = json.choices?.[0]?.message?.content ?? "";
     const match = raw.match(/\{[\s\S]*\}/);
-    const parsed = match ? (JSON.parse(match[0]) as { unit_price?: number; rationale?: string }) : null;
+    const parsed = match
+      ? (JSON.parse(match[0]) as { unit_price?: number; rationale?: string })
+      : null;
     const price = Number(parsed?.unit_price);
     if (!Number.isFinite(price) || price <= 0) throw new Error("unparseable proposal");
     return {
@@ -153,7 +155,11 @@ export function refundGate(opts: {
       pass: opts.refundAmount <= cap,
       detail: `cap ${cap}`,
     },
-    { label: "Dispute is open", pass: opts.disputeOpen, detail: opts.disputeOpen ? "open" : "closed" },
+    {
+      label: "Dispute is open",
+      pass: opts.disputeOpen,
+      detail: opts.disputeOpen ? "open" : "closed",
+    },
     {
       label: "No existing successful refund",
       pass: !opts.alreadyRefunded,
@@ -173,7 +179,11 @@ export function settlementGate(opts: {
   const checks: GateCheck[] = [
     { label: "Webhook signature verified", pass: opts.signatureVerified, detail: "HMAC-SHA256" },
     { label: "Shipment delivered", pass: opts.delivered, detail: "logistics event" },
-    { label: "No open dispute", pass: !opts.disputeOpen, detail: opts.disputeOpen ? "dispute open" : "none" },
+    {
+      label: "No open dispute",
+      pass: !opts.disputeOpen,
+      detail: opts.disputeOpen ? "dispute open" : "none",
+    },
     { label: "Escrow held", pass: opts.escrowHeld, detail: "escrow state" },
     {
       label: "Not already settled",

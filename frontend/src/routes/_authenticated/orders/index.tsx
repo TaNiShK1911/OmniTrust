@@ -11,9 +11,15 @@ export const Route = createFileRoute("/_authenticated/orders/")({
   head: () => ({
     meta: [
       { title: "Orders — OmniTrust" },
-      { name: "description", content: "Every negotiated order with escrow, shipment, settlement and refund state." },
+      {
+        name: "description",
+        content: "Every negotiated order with escrow, shipment, settlement and refund state.",
+      },
       { property: "og:title", content: "Orders — OmniTrust" },
-      { property: "og:description", content: "Negotiated orders with escrow and settlement state." },
+      {
+        property: "og:description",
+        content: "Negotiated orders with escrow and settlement state.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -26,7 +32,10 @@ function Orders() {
   const orders = useQuery({ queryKey: ["orders"], queryFn: () => load() });
 
   return (
-    <AppShell title="Orders" subtitle="Escrow, custody and settlement, one row per negotiated deal.">
+    <AppShell
+      title="Orders"
+      subtitle="Escrow, custody and settlement, one row per negotiated deal."
+    >
       {orders.isLoading ? <ApiState loading /> : null}
       {orders.isError ? <ApiState error={orders.error} onRetry={() => orders.refetch()} /> : null}
 
@@ -36,7 +45,10 @@ function Orders() {
             <p className="text-sm text-muted-foreground">
               No orders yet. Negotiate a catalog line item to create your first one.
             </p>
-            <Link to="/catalog" className="label-mono mt-4 inline-block border border-primary px-3 py-2 text-primary">
+            <Link
+              to="/catalog"
+              className="label-mono mt-4 inline-block border border-primary px-3 py-2 text-primary"
+            >
               Go to catalog →
             </Link>
           </div>
@@ -45,7 +57,17 @@ function Orders() {
             <table className="w-full border-collapse text-sm">
               <thead>
                 <tr className="border-b border-border">
-                  {["Order", "Created", "Product", "Qty", "Unit", "Total", "Escrow", "Status", ""].map((h) => (
+                  {[
+                    "Order",
+                    "Created",
+                    "Product",
+                    "Qty",
+                    "Unit",
+                    "Total",
+                    "Escrow",
+                    "Status",
+                    "",
+                  ].map((h) => (
                     <th key={h} className="label-mono px-3 py-2 text-left text-muted-foreground">
                       {h}
                     </th>
@@ -56,7 +78,9 @@ function Orders() {
                 {(orders.data ?? []).map((o) => (
                   <tr key={o.id} className="border-b border-border hover:bg-muted">
                     <td className="mono-id px-3 py-2">{shortId(o.id)}</td>
-                    <td className="mono-id px-3 py-2 text-muted-foreground">{timeOf(o.created_at)}</td>
+                    <td className="mono-id px-3 py-2 text-muted-foreground">
+                      {timeOf(o.created_at)}
+                    </td>
                     <td className="px-3 py-2">{o.product_name}</td>
                     <td className="mono-id px-3 py-2">{o.quantity}</td>
                     <td className="mono-id px-3 py-2">{inr(o.unit_price)}</td>

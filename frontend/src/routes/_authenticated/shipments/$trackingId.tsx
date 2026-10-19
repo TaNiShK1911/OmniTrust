@@ -11,9 +11,15 @@ export const Route = createFileRoute("/_authenticated/shipments/$trackingId")({
   head: () => ({
     meta: [
       { title: "Shipment custody — OmniTrust" },
-      { name: "description", content: "Tracking, carrier and condition for a shipment under escrow custody." },
+      {
+        name: "description",
+        content: "Tracking, carrier and condition for a shipment under escrow custody.",
+      },
       { property: "og:title", content: "Shipment custody — OmniTrust" },
-      { property: "og:description", content: "Tracking, carrier and condition under escrow custody." },
+      {
+        property: "og:description",
+        content: "Tracking, carrier and condition under escrow custody.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -32,8 +38,7 @@ function ShipmentDetail() {
 
   const s = shipment.data;
   const order = s?.orders as
-    | { id: string; product_name: string; total_amount: number; status: string }
-    | undefined;
+    { id: string; product_name: string; total_amount: number; status: string } | undefined;
 
   return (
     <AppShell
@@ -50,14 +55,19 @@ function ShipmentDetail() {
               Open order
             </Link>
           ) : null}
-          <Link to="/logistics" className="label-mono lift border border-primary px-4 py-2.5 text-primary">
+          <Link
+            to="/logistics"
+            className="label-mono lift border border-primary px-4 py-2.5 text-primary"
+          >
             Warehouse portal →
           </Link>
         </>
       }
     >
       {shipment.isLoading ? <ApiState loading /> : null}
-      {shipment.isError ? <ApiState error={shipment.error} onRetry={() => shipment.refetch()} /> : null}
+      {shipment.isError ? (
+        <ApiState error={shipment.error} onRetry={() => shipment.refetch()} />
+      ) : null}
 
       {s ? (
         <div className="grid gap-6 lg:grid-cols-3">
@@ -100,12 +110,25 @@ function ShipmentDetail() {
                 { label: "Registered with 3PL", state: "done", detail: timeOf(s.created_at) },
                 {
                   label: "Delivered",
-                  state: s.status === "delivered" ? "done" : s.status === "damaged" ? "failed" : "current",
-                  detail: s.status === "damaged" ? "Damage reported at handover" : "Awaits signed webhook",
+                  state:
+                    s.status === "delivered"
+                      ? "done"
+                      : s.status === "damaged"
+                        ? "failed"
+                        : "current",
+                  detail:
+                    s.status === "damaged"
+                      ? "Damage reported at handover"
+                      : "Awaits signed webhook",
                 },
                 {
                   label: "Escrow decision",
-                  state: order?.status === "settled" ? "done" : order?.status === "refunded" ? "failed" : "todo",
+                  state:
+                    order?.status === "settled"
+                      ? "done"
+                      : order?.status === "refunded"
+                        ? "failed"
+                        : "todo",
                   detail: order?.status ?? undefined,
                 },
               ]}

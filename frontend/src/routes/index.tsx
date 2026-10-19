@@ -71,13 +71,22 @@ function Landing() {
             Omni<span className="text-terminal-foreground">Trust</span>
           </span>
           <nav className="hidden gap-1 md:flex">
-            <a href="#how-it-works" className="label-mono px-3 py-2 text-muted-foreground hover:text-foreground">
+            <a
+              href="#how-it-works"
+              className="label-mono px-3 py-2 text-muted-foreground hover:text-foreground"
+            >
               How it works
             </a>
-            <a href="#architecture" className="label-mono px-3 py-2 text-muted-foreground hover:text-foreground">
+            <a
+              href="#architecture"
+              className="label-mono px-3 py-2 text-muted-foreground hover:text-foreground"
+            >
               Architecture
             </a>
-            <a href="#guarantees" className="label-mono px-3 py-2 text-muted-foreground hover:text-foreground">
+            <a
+              href="#guarantees"
+              className="label-mono px-3 py-2 text-muted-foreground hover:text-foreground"
+            >
               Guarantees
             </a>
           </nav>
@@ -106,9 +115,9 @@ function Landing() {
             <span className="text-terminal-foreground">with guardrails.</span>
           </h1>
           <p className="body-lg mt-6 max-w-2xl text-muted-foreground">
-            OmniTrust runs a full commercial settlement — agent negotiation, deterministic policy gating, escrow,
-            physical shipment verification and refund — while showing you exactly what the model suggested versus what
-            the code actually allowed.
+            OmniTrust runs a full commercial settlement — agent negotiation, deterministic policy
+            gating, escrow, physical shipment verification and refund — while showing you exactly
+            what the model suggested versus what the code actually allowed.
           </p>
           <div className="mt-10 flex flex-wrap gap-3">
             <Link
@@ -118,7 +127,10 @@ function Landing() {
             >
               Enter OmniTrust →
             </Link>
-            <a href="#architecture" className="label-mono lift border border-primary px-6 py-3.5 text-primary">
+            <a
+              href="#architecture"
+              className="label-mono lift border border-primary px-6 py-3.5 text-primary"
+            >
               View architecture
             </a>
           </div>
@@ -152,8 +164,9 @@ function Landing() {
             </span>
           </div>
           <p className="mt-4 max-w-2xl text-sm text-navy-muted">
-            The browser never touches LLM credentials or settlement keys. Every model interaction, policy decision,
-            escrow transition, and webhook verification is executed server-side and recorded to an immutable ledger.
+            The browser never touches LLM credentials or settlement keys. Every model interaction,
+            policy decision, escrow transition, and webhook verification is executed server-side and
+            recorded to an immutable ledger.
           </p>
 
           <div className="mt-10 space-y-4">
@@ -165,8 +178,12 @@ function Landing() {
                     <Globe className="size-4" />
                   </div>
                   <div>
-                    <h3 className="font-display text-sm font-semibold text-navy-foreground">Client Console (Browser)</h3>
-                    <p className="text-xs text-navy-muted">Operator UI & real-time negotiation views</p>
+                    <h3 className="font-display text-sm font-semibold text-navy-foreground">
+                      Client Console (Browser)
+                    </h3>
+                    <p className="text-xs text-navy-muted">
+                      Operator UI & real-time negotiation views
+                    </p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -199,7 +216,9 @@ function Landing() {
                     <h3 className="font-display text-base font-semibold text-navy-foreground">
                       OmniTrust Core Settlement Engine
                     </h3>
-                    <p className="text-xs text-navy-muted">Server-side policy enforcement & state machine</p>
+                    <p className="text-xs text-navy-muted">
+                      Server-side policy enforcement & state machine
+                    </p>
                   </div>
                 </div>
                 <span className="label-mono rounded border border-terminal bg-terminal px-2.5 py-1 text-xs font-semibold text-navy">
@@ -211,9 +230,13 @@ function Landing() {
                 <div className="rounded border border-navy-border bg-white/[0.02] p-4 transition-colors hover:border-terminal/50">
                   <div className="flex items-center gap-2 text-terminal">
                     <Bot className="size-4" />
-                    <span className="font-mono text-xs font-semibold uppercase tracking-wider">AI Gateway</span>
+                    <span className="font-mono text-xs font-semibold uppercase tracking-wider">
+                      AI Gateway
+                    </span>
                   </div>
-                  <h4 className="mt-2 text-sm font-medium text-navy-foreground">Bounded LLM Agent</h4>
+                  <h4 className="mt-2 text-sm font-medium text-navy-foreground">
+                    Bounded LLM Agent
+                  </h4>
                   <p className="mt-1 text-xs text-navy-muted">
                     Proposals only — agent recommendations never unilaterally commit price.
                   </p>
@@ -222,9 +245,13 @@ function Landing() {
                 <div className="rounded border border-navy-border bg-white/[0.02] p-4 transition-colors hover:border-terminal/50">
                   <div className="flex items-center gap-2 text-terminal">
                     <ShieldCheck className="size-4" />
-                    <span className="font-mono text-xs font-semibold uppercase tracking-wider">Gatekeeper</span>
+                    <span className="font-mono text-xs font-semibold uppercase tracking-wider">
+                      Gatekeeper
+                    </span>
                   </div>
-                  <h4 className="mt-2 text-sm font-medium text-navy-foreground">Policy Guardrails</h4>
+                  <h4 className="mt-2 text-sm font-medium text-navy-foreground">
+                    Policy Guardrails
+                  </h4>
                   <p className="mt-1 text-xs text-navy-muted">
                     Deterministic code checks: turn budget (≤4) & server-side price floors.
                   </p>
@@ -233,9 +260,13 @@ function Landing() {
                 <div className="rounded border border-navy-border bg-white/[0.02] p-4 transition-colors hover:border-terminal/50">
                   <div className="flex items-center gap-2 text-terminal">
                     <CreditCard className="size-4" />
-                    <span className="font-mono text-xs font-semibold uppercase tracking-wider">Escrow Flow</span>
+                    <span className="font-mono text-xs font-semibold uppercase tracking-wider">
+                      Escrow Flow
+                    </span>
                   </div>
-                  <h4 className="mt-2 text-sm font-medium text-navy-foreground">Payment Subsystem</h4>
+                  <h4 className="mt-2 text-sm font-medium text-navy-foreground">
+                    Payment Subsystem
+                  </h4>
                   <p className="mt-1 text-xs text-navy-muted">
                     PayPal Orders v2 & Payments v2 with gated release and delivery proof.
                   </p>
@@ -244,7 +275,9 @@ function Landing() {
                 <div className="rounded border border-navy-border bg-white/[0.02] p-4 transition-colors hover:border-terminal/50">
                   <div className="flex items-center gap-2 text-terminal">
                     <FileText className="size-4" />
-                    <span className="font-mono text-xs font-semibold uppercase tracking-wider">Audit Ledger</span>
+                    <span className="font-mono text-xs font-semibold uppercase tracking-wider">
+                      Audit Ledger
+                    </span>
                   </div>
                   <h4 className="mt-2 text-sm font-medium text-navy-foreground">Immutable Trail</h4>
                   <p className="mt-1 text-xs text-navy-muted">
@@ -306,7 +339,8 @@ function Landing() {
           <div>
             <h2 className="headline-lg">Follow the whole story in one sitting.</h2>
             <p className="mt-3 max-w-xl text-sm text-muted-foreground">
-              Catalog · Negotiation · Gatekeeper · Escrow · Shipment · Signed Webhook · Settlement / Refund · Audit Trail. No developer tools required.
+              Catalog · Negotiation · Gatekeeper · Escrow · Shipment · Signed Webhook · Settlement /
+              Refund · Audit Trail. No developer tools required.
             </p>
           </div>
           <Link
@@ -321,7 +355,9 @@ function Landing() {
 
       <footer className="panel-dark border-t">
         <div className="mx-auto flex max-w-[1280px] flex-wrap items-center justify-between gap-4 px-4 py-8 md:px-6">
-          <p className="label-mono text-navy-muted">OmniTrust · buildathon track: agentic commerce</p>
+          <p className="label-mono text-navy-muted">
+            OmniTrust · buildathon track: agentic commerce
+          </p>
           <p className="mono-id text-navy-muted">
             Running in PayPal Sandbox — no real funds ever move.
           </p>
@@ -330,4 +366,3 @@ function Landing() {
     </div>
   );
 }
-

@@ -23,7 +23,13 @@ export function StatusBadge({
 }) {
   const t = tone ?? toneForStatus(status);
   return (
-    <span className={cn("label-mono inline-flex items-center border px-2 py-1", TONE_CLASS[t], className)}>
+    <span
+      className={cn(
+        "label-mono inline-flex items-center border px-2 py-1",
+        TONE_CLASS[t],
+        className,
+      )}
+    >
       {status.replace(/_/g, " ")}
     </span>
   );
@@ -72,7 +78,11 @@ export function LabelValue({
   );
 }
 
-export function GateChecks({ checks }: { checks: { label: string; pass: boolean; detail: string }[] }) {
+export function GateChecks({
+  checks,
+}: {
+  checks: { label: string; pass: boolean; detail: string }[];
+}) {
   return (
     <ul className="divide-y divide-border border border-border">
       {checks.map((c) => (
@@ -119,7 +129,11 @@ export function MoneyCard({
 export function Timeline({
   steps,
 }: {
-  steps: { label: string; state: "done" | "current" | "todo" | "failed"; detail?: string | undefined }[];
+  steps: {
+    label: string;
+    state: "done" | "current" | "todo" | "failed";
+    detail?: string | undefined;
+  }[];
 }) {
   return (
     <ol className="space-y-0">
@@ -138,7 +152,9 @@ export function Timeline({
             {i < steps.length - 1 ? <span className="w-px flex-1 bg-border" /> : null}
           </div>
           <div className="pb-5">
-            <p className={cn("text-sm font-medium", s.state === "todo" && "text-muted-foreground")}>{s.label}</p>
+            <p className={cn("text-sm font-medium", s.state === "todo" && "text-muted-foreground")}>
+              {s.label}
+            </p>
             {s.detail ? <p className="mono-id text-muted-foreground">{s.detail}</p> : null}
           </div>
         </li>
@@ -173,7 +189,10 @@ export function ApiState({
           {message ?? (error instanceof Error ? error.message : "Something went wrong.")}
         </p>
         {onRetry ? (
-          <button onClick={onRetry} className="label-mono mt-4 border border-primary px-3 py-2 text-primary">
+          <button
+            onClick={onRetry}
+            className="label-mono mt-4 border border-primary px-3 py-2 text-primary"
+          >
             Retry
           </button>
         ) : null}

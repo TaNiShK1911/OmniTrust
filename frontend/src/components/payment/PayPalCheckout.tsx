@@ -34,8 +34,8 @@ export function PayPalCheckout({
 
   // Client ID from Vite environment (defaults to PayPal Sandbox 'test' client ID if not configured)
   const clientId =
-    (import.meta as any).env?.VITE_PAYPAL_CLIENT_ID ||
-    "test";
+    (import.meta as unknown as { env?: Record<string, string | undefined> }).env
+      ?.VITE_PAYPAL_CLIENT_ID || "test";
 
   return (
     <div className="rounded-lg border border-border bg-card/60 p-4 shadow-sm backdrop-blur-sm">
@@ -50,8 +50,9 @@ export function PayPalCheckout({
       </div>
 
       <p className="mb-4 text-xs text-muted-foreground">
-        Funds are authorized and held by PayPal. Money will <strong className="text-foreground">not</strong> release
-        until delivery proof is signed and deterministic policy gates pass.
+        Funds are authorized and held by PayPal. Money will{" "}
+        <strong className="text-foreground">not</strong> release until delivery proof is signed and
+        deterministic policy gates pass.
       </p>
 
       {authError ? (
@@ -82,8 +83,9 @@ export function PayPalCheckout({
               try {
                 const res = await createOrderFn({ data: { orderId } });
                 return res.paypal_order_id;
-              } catch (err: any) {
-                const msg = err.message || "Failed to initialize PayPal order";
+              } catch (err: unknown) {
+                const msg =
+                  err instanceof Error ? err.message : "Failed to initialize PayPal order";
                 setAuthError(msg);
                 onError?.(msg);
                 throw err;
@@ -100,8 +102,9 @@ export function PayPalCheckout({
                   },
                 });
                 onSuccess?.();
-              } catch (err: any) {
-                const msg = err.message || "PayPal authorization confirmation failed";
+              } catch (err: unknown) {
+                const msg =
+                  err instanceof Error ? err.message : "PayPal authorization confirmation failed";
                 setAuthError(msg);
                 onError?.(msg);
               } finally {

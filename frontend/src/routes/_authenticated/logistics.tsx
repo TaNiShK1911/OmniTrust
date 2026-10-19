@@ -18,7 +18,10 @@ export const Route = createFileRoute("/_authenticated/logistics")({
         content: "Registered shipments pending fulfillment by the 3PL provider.",
       },
       { property: "og:title", content: "Warehouse portal — OmniTrust" },
-      { property: "og:description", content: "Registered shipments pending fulfillment by the 3PL provider." },
+      {
+        property: "og:description",
+        content: "Registered shipments pending fulfillment by the 3PL provider.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -31,7 +34,11 @@ type Shipment = { id: string; tracking_id: string; status: string; condition: st
 function Logistics() {
   const loadOrders = useServerFn(fetchOrders);
 
-  const orders = useQuery({ queryKey: ["orders"], queryFn: () => loadOrders(), refetchInterval: 5000 });
+  const orders = useQuery({
+    queryKey: ["orders"],
+    queryFn: () => loadOrders(),
+    refetchInterval: 5000,
+  });
 
   const shipments = (orders.data ?? []).flatMap((o) =>
     ((o.shipments as Shipment[] | null) ?? []).map((s) => ({ order: o, shipment: s })),
@@ -54,7 +61,10 @@ function Logistics() {
           ) : (
             <ul className="divide-y divide-border">
               {shipments.map(({ order, shipment }) => (
-                <li key={shipment.id} className="flex flex-wrap items-center justify-between gap-4 p-4">
+                <li
+                  key={shipment.id}
+                  className="flex flex-wrap items-center justify-between gap-4 p-4"
+                >
                   <div className="grid gap-4 sm:grid-cols-3">
                     <LabelValue label="Tracking" value={shipment.tracking_id} mono />
                     <LabelValue label="Order" value={shortId(order.id)} mono />
@@ -89,7 +99,7 @@ function Logistics() {
         </Panel>
 
         {shipments.length > 0 && (
-          <Panel title="Bryntum Escrow & Logistics Milestone Timeline">
+          <Panel title="Escrow & Logistics Milestone Timeline (Bryntum-Compatible)">
             <EscrowLifecycleTimeline
               milestones={[
                 {
@@ -132,7 +142,8 @@ function Logistics() {
                       : "In-Transit to Destination",
                   actor: "Mock Logistics Carrier",
                   timestamp: shipments[0].order.updated_at,
-                  status: shipments[0].shipment.status === "delivered" ? "completed" : "in_progress",
+                  status:
+                    shipments[0].shipment.status === "delivered" ? "completed" : "in_progress",
                   proof_hash:
                     shipments[0].shipment.status === "delivered"
                       ? `sha256:${shipments[0].shipment.tracking_id.slice(-8)}...verified`

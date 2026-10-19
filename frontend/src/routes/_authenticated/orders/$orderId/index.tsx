@@ -3,7 +3,14 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 
 import { ActionButton, AppShell } from "@/components/omni/AppShell";
-import { ApiState, LabelValue, MoneyCard, Panel, StatusBadge, Timeline } from "@/components/omni/ui";
+import {
+  ApiState,
+  LabelValue,
+  MoneyCard,
+  Panel,
+  StatusBadge,
+  Timeline,
+} from "@/components/omni/ui";
 import { inr, shortId, timeOf } from "@/lib/omni";
 import { createEscrow, fetchOrder, registerShipment } from "@/lib/omni.functions";
 import { PayPalCheckout } from "@/components/payment/PayPalCheckout";
@@ -12,9 +19,15 @@ export const Route = createFileRoute("/_authenticated/orders/$orderId/")({
   head: () => ({
     meta: [
       { title: "Order detail — OmniTrust" },
-      { name: "description", content: "Escrow, shipment custody and settlement controls for a negotiated order." },
+      {
+        name: "description",
+        content: "Escrow, shipment custody and settlement controls for a negotiated order.",
+      },
       { property: "og:title", content: "Order detail — OmniTrust" },
-      { property: "og:description", content: "Escrow, custody and settlement controls for one order." },
+      {
+        property: "og:description",
+        content: "Escrow, custody and settlement controls for one order.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -22,7 +35,13 @@ export const Route = createFileRoute("/_authenticated/orders/$orderId/")({
   component: OrderDetail,
 });
 
-type Shipment = { id: string; tracking_id: string; status: string; carrier: string; condition: string };
+type Shipment = {
+  id: string;
+  tracking_id: string;
+  status: string;
+  carrier: string;
+  condition: string;
+};
 type Dispute = { id: string; status: string; decision: string | null };
 
 function OrderDetail() {
@@ -51,8 +70,16 @@ function OrderDetail() {
   const shipment = (o?.shipments as Shipment[] | undefined)?.[0];
   const dispute = (o?.disputes as Dispute[] | undefined)?.[0];
 
-  const steps: { label: string; state: "done" | "current" | "todo" | "failed"; detail?: string | undefined }[] = [
-    { label: "Consensus approved", state: "done", detail: o ? `Unit ${inr(o.unit_price)}` : undefined },
+  const steps: {
+    label: string;
+    state: "done" | "current" | "todo" | "failed";
+    detail?: string | undefined;
+  }[] = [
+    {
+      label: "Consensus approved",
+      state: "done",
+      detail: o ? `Unit ${inr(o.unit_price)}` : undefined,
+    },
     {
       label: "Escrow held",
       state: o?.escrow_status === "held" || o?.settlement_ref ? "done" : "current",
@@ -121,7 +148,11 @@ function OrderDetail() {
         <div className="grid gap-6 lg:grid-cols-3">
           <div className="space-y-6 lg:col-span-2">
             <div className="grid gap-px bg-border sm:grid-cols-3">
-              <MoneyCard label="Order total" amount={inr(o.total_amount)} reference={o.idempotency_key} />
+              <MoneyCard
+                label="Order total"
+                amount={inr(o.total_amount)}
+                reference={o.idempotency_key}
+              />
               <MoneyCard
                 label="Escrow"
                 amount={o.escrow_status === "held" ? inr(o.total_amount) : inr(0)}
@@ -212,21 +243,26 @@ function OrderDetail() {
                 <ActionButton
                   variant="outline"
                   onClick={() => registerParcel.mutate()}
-                  disabled={registerParcel.isPending || o.escrow_status !== "held" || Boolean(shipment)}
+                  disabled={
+                    registerParcel.isPending || o.escrow_status !== "held" || Boolean(shipment)
+                  }
                   className="w-full"
                 >
                   {registerParcel.isPending ? "Registering…" : "Register shipment"}
                 </ActionButton>
                 <ActionButton
                   variant="terminal"
-                  onClick={() => navigate({ to: "/orders/$orderId/settlement", params: { orderId } })}
+                  onClick={() =>
+                    navigate({ to: "/orders/$orderId/settlement", params: { orderId } })
+                  }
                   disabled={!shipment}
                   className="w-full"
                 >
                   Go to settlement gate →
                 </ActionButton>
                 <p className="text-sm text-muted-foreground">
-                  Escrow is idempotent: a repeated hold is recorded as a suppressed duplicate, never a second charge.
+                  Escrow is idempotent: a repeated hold is recorded as a suppressed duplicate, never
+                  a second charge.
                 </p>
               </div>
             </Panel>

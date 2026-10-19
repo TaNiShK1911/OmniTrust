@@ -16,7 +16,10 @@ export const Route = createFileRoute("/_authenticated/orders/$orderId/settlement
         content: "Release escrow only when every deterministic settlement precondition passes.",
       },
       { property: "og:title", content: "Settlement gate — OmniTrust" },
-      { property: "og:description", content: "Deterministic settlement preconditions before escrow release." },
+      {
+        property: "og:description",
+        content: "Deterministic settlement preconditions before escrow release.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -79,8 +82,14 @@ function Settlement() {
               <MoneyCard
                 label={`Escrow (${pay?.state || (o.escrow_status === "held" ? "FUNDS_AUTHORIZED" : "PENDING")})`}
                 amount={inr(o.total_amount)}
-                reference={pay?.authorization_id ? `Auth: ${shortId(pay.authorization_id)}` : o.escrow_ref}
-                tone={pay?.state === "FUNDS_AUTHORIZED" || o.escrow_status === "held" ? "active" : "pending"}
+                reference={
+                  pay?.authorization_id ? `Auth: ${shortId(pay.authorization_id)}` : o.escrow_ref
+                }
+                tone={
+                  pay?.state === "FUNDS_AUTHORIZED" || o.escrow_status === "held"
+                    ? "active"
+                    : "pending"
+                }
               />
               <MoneyCard
                 label="Delivery status"
@@ -101,9 +110,9 @@ function Settlement() {
                 <GateChecks checks={checks} />
               ) : (
                 <p className="text-sm text-muted-foreground">
-                  Run the settlement attempt to evaluate signature verification, delivery confirmation, dispute state,
-                  escrow custody and double-payout protection. Failures are recorded in the audit trail with no money
-                  movement.
+                  Run the settlement attempt to evaluate signature verification, delivery
+                  confirmation, dispute state, escrow custody and double-payout protection. Failures
+                  are recorded in the audit trail with no money movement.
                 </p>
               )}
               {release.isError ? (
@@ -113,7 +122,8 @@ function Settlement() {
               ) : null}
               {release.data && !release.data.ok ? (
                 <p className="mt-4 text-sm text-warning-foreground">
-                  Settlement blocked. Nothing was paid out — resolve the failing precondition and retry.
+                  Settlement blocked. Nothing was paid out — resolve the failing precondition and
+                  retry.
                 </p>
               ) : null}
             </Panel>
@@ -156,7 +166,8 @@ function Settlement() {
                 Inspect audit trail
               </Link>
               <p className="text-sm text-muted-foreground">
-                A repeated release is refused by the double-payout check, so escrow can only leave custody once.
+                A repeated release is refused by the double-payout check, so escrow can only leave
+                custody once.
               </p>
             </div>
           </Panel>

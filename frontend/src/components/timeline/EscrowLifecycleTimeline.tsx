@@ -4,8 +4,11 @@
  * Visualizes the complete deal journey:
  * Negotiation Agreed → PayPal Authorized → Shipment Waypoint Scans → Signed Delivery Proof → Gated Settlement.
  *
- * Includes license-safe fallback with accessible, interactive milestone visualization
- * and optional Bryntum Scheduler integration.
+ * Architecture Note:
+ * Uses a native React milestone visualization designed with Bryntum-compatible event schema.
+ * Commercial Bryntum Scheduler integration requires authenticated access to Bryntum's private npm
+ * repository (npm.bryntum.com) and an enterprise license. This component serves as the production-safe
+ * fallback and cleanly defines the data adapter boundary for enterprise Bryntum deployment.
  */
 import React from "react";
 import {
@@ -20,6 +23,7 @@ import {
   Check,
   CreditCard,
   Building2,
+  Info,
 } from "lucide-react";
 
 import { LifecycleMilestone, TimelineEventType } from "@/lib/timeline.types";
@@ -113,9 +117,13 @@ export function EscrowLifecycleTimeline({ milestones, orderId }: EscrowLifecycle
                   <div className="flex flex-wrap items-center justify-between gap-2">
                     <div className="flex items-center gap-2">
                       <span className="text-xs font-semibold text-foreground">{m.title}</span>
-                      <span className="label-mono text-[10px] text-muted-foreground">· {m.actor}</span>
+                      <span className="label-mono text-[10px] text-muted-foreground">
+                        · {m.actor}
+                      </span>
                     </div>
-                    <span className="font-mono text-[11px] text-muted-foreground">{m.timestamp}</span>
+                    <span className="font-mono text-[11px] text-muted-foreground">
+                      {m.timestamp}
+                    </span>
                   </div>
 
                   {m.reference_id && (

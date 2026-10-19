@@ -11,7 +11,10 @@ export const Route = createFileRoute("/_authenticated/onboarding")({
   head: () => ({
     meta: [
       { title: "Finish setup — OmniTrust" },
-      { name: "description", content: "Complete your OmniTrust operator profile and preferred evaluation scenario." },
+      {
+        name: "description",
+        content: "Complete your OmniTrust operator profile and preferred evaluation scenario.",
+      },
       { property: "og:title", content: "Finish setup — OmniTrust" },
       { property: "og:description", content: "Complete your OmniTrust operator profile." },
       { property: "og:type", content: "website" },
@@ -104,7 +107,9 @@ function Onboarding() {
                       type="button"
                       onClick={() => setRole(r)}
                       className={`label-mono flex-1 px-3 py-2.5 ${
-                        role === r ? "bg-primary text-primary-foreground" : "bg-background text-muted-foreground"
+                        role === r
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-background text-muted-foreground"
                       }`}
                     >
                       {r}
@@ -139,7 +144,11 @@ function Onboarding() {
                 <ApiState error={mutation.error} onRetry={() => mutation.mutate()} />
               ) : null}
 
-              <ActionButton onClick={() => mutation.mutate()} disabled={mutation.isPending} className="w-full">
+              <ActionButton
+                onClick={() => mutation.mutate()}
+                disabled={mutation.isPending}
+                className="w-full"
+              >
                 {mutation.isPending ? "Saving…" : "Finish setup →"}
               </ActionButton>
             </div>

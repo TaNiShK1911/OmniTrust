@@ -12,7 +12,10 @@ export const Route = createFileRoute("/_authenticated/catalog")({
   head: () => ({
     meta: [
       { title: "Catalog — OmniTrust" },
-      { name: "description", content: "B2B catalog. Open a bounded agent negotiation on any line item." },
+      {
+        name: "description",
+        content: "B2B catalog. Open a bounded agent negotiation on any line item.",
+      },
       { property: "og:title", content: "Catalog — OmniTrust" },
       { property: "og:description", content: "B2B catalog with bounded agent negotiation." },
       { property: "og:type", content: "website" },
@@ -44,7 +47,9 @@ function Catalog() {
       subtitle="Each line item carries a seller price floor that the agents never see."
     >
       {products.isLoading ? <ApiState loading /> : null}
-      {products.isError ? <ApiState error={products.error} onRetry={() => products.refetch()} /> : null}
+      {products.isError ? (
+        <ApiState error={products.error} onRetry={() => products.refetch()} />
+      ) : null}
       {mutation.isError ? (
         <div className="mb-6">
           <ApiState error={mutation.error} message="The negotiation could not be opened." />
@@ -95,7 +100,8 @@ function Catalog() {
                       className="mt-2 w-full accent-[oklch(0.577_0.235_267)]"
                     />
                     <p className="mono-id mt-1 text-muted-foreground">
-                      Target unit price {inr(Math.round(Number(p.list_price) * (1 - discount / 100)))}
+                      Target unit price{" "}
+                      {inr(Math.round(Number(p.list_price) * (1 - discount / 100)))}
                     </p>
                   </div>
                   <ActionButton
@@ -108,7 +114,11 @@ function Catalog() {
                 </div>
               ) : (
                 <div className="border-t border-border p-5">
-                  <ActionButton variant="outline" onClick={() => setSelected(p.id)} className="w-full">
+                  <ActionButton
+                    variant="outline"
+                    onClick={() => setSelected(p.id)}
+                    className="w-full"
+                  >
                     Negotiate
                   </ActionButton>
                 </div>
@@ -120,9 +130,10 @@ function Catalog() {
 
       <Panel title="How the price floor works" className="mt-8">
         <p className="text-sm text-muted-foreground">
-          The buyer agent proposes a unit price without knowledge of the floor. The deterministic gatekeeper compares
-          each proposal to the floor server-side; a proposal below it is rejected and the seller agent counters at the
-          midpoint. After four turns the session expires with no order.
+          The buyer agent proposes a unit price without knowledge of the floor. The deterministic
+          gatekeeper compares each proposal to the floor server-side; a proposal below it is
+          rejected and the seller agent counters at the midpoint. After four turns the session
+          expires with no order.
         </p>
       </Panel>
     </AppShell>

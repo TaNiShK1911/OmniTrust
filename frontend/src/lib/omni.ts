@@ -68,7 +68,9 @@ export type StatusTone = "success" | "active" | "pending" | "warning" | "failed"
 
 export function toneForStatus(status: string): StatusTone {
   const s = status.toLowerCase();
-  if (["settled", "delivered", "success", "released", "accepted", "verified", "refunded"].includes(s))
+  if (
+    ["settled", "delivered", "success", "released", "accepted", "verified", "refunded"].includes(s)
+  )
     return "success";
   if (["active", "in_transit", "negotiating", "held", "escrow_held", "arbitrating"].includes(s))
     return "active";

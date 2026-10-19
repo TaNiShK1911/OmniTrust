@@ -46,6 +46,9 @@ class Settings(BaseSettings):
     logistics_base_url: str = "http://localhost:5001"
     logistics_webhook_secret: str = "omnitrust_logistics_secret_2026"
 
+    # ── Background Worker (Celery / Redis) ────────────────────────────────────
+    redis_url: str = "redis://localhost:6379/0"
+
     # ── Business rules ────────────────────────────────────────────────────────
     negotiation_max_turns: int = 4
     max_order_value_inr: float = 500_000.0

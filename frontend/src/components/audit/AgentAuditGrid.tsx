@@ -7,7 +7,14 @@
  */
 import React, { useMemo, useState } from "react";
 import { AgGridReact } from "ag-grid-react";
-import { AllCommunityModule, ModuleRegistry, ColDef, RowSelectedEvent } from "ag-grid-community";
+import {
+  AllCommunityModule,
+  ModuleRegistry,
+  ColDef,
+  RowSelectedEvent,
+  ICellRendererParams,
+  ValueFormatterParams,
+} from "ag-grid-community";
 import { Shield, Search, RefreshCw, CheckCircle2, Clock, AlertTriangle } from "lucide-react";
 
 import { AgentAuditRow } from "@/lib/audit.types";
@@ -32,7 +39,7 @@ export function AgentAuditGrid({ data, isLoading, onRefresh }: AgentAuditGridPro
         headerName: "Order ID",
         field: "order_id",
         minWidth: 150,
-        cellRenderer: (params: any) => {
+        cellRenderer: (params: ICellRendererParams<AgentAuditRow>) => {
           const val = params.value || "";
           const short = val.length > 13 ? `${val.slice(0, 8)}…${val.slice(-4)}` : val;
           return <span className="font-mono text-xs font-semibold text-primary">{short}</span>;
@@ -42,27 +49,31 @@ export function AgentAuditGrid({ data, isLoading, onRefresh }: AgentAuditGridPro
         headerName: "Product",
         field: "product_name",
         minWidth: 140,
-        cellRenderer: (params: any) => <span className="font-medium text-xs">{params.value}</span>,
+        cellRenderer: (params: ICellRendererParams<AgentAuditRow>) => (
+          <span className="font-medium text-xs">{params.value}</span>
+        ),
       },
       {
         headerName: "Buyer Agent Bid",
         field: "buyer_bid",
         minWidth: 130,
-        valueFormatter: (p: any) => `$${Number(p.value || 0).toFixed(2)}`,
+        valueFormatter: (p: ValueFormatterParams<AgentAuditRow>) =>
+          `$${Number(p.value || 0).toFixed(2)}`,
         cellClass: "font-mono text-xs",
       },
       {
         headerName: "Seller Counter",
         field: "seller_counteroffer",
         minWidth: 130,
-        valueFormatter: (p: any) => `$${Number(p.value || 0).toFixed(2)}`,
+        valueFormatter: (p: ValueFormatterParams<AgentAuditRow>) =>
+          `$${Number(p.value || 0).toFixed(2)}`,
         cellClass: "font-mono text-xs",
       },
       {
         headerName: "Consensus Score",
         field: "consensus_score_pct",
         minWidth: 140,
-        cellRenderer: (params: any) => {
+        cellRenderer: (params: ICellRendererParams<AgentAuditRow>) => {
           const score = Number(params.value || 0);
           return (
             <div className="flex items-center gap-2 h-full">
@@ -81,7 +92,7 @@ export function AgentAuditGrid({ data, isLoading, onRefresh }: AgentAuditGridPro
         headerName: "Payment State",
         field: "payment_state",
         minWidth: 160,
-        cellRenderer: (params: any) => {
+        cellRenderer: (params: ICellRendererParams<AgentAuditRow>) => {
           const state = params.value || "PENDING";
           let badgeClass = "bg-muted text-muted-foreground border-border";
           let Icon = Clock;
@@ -99,7 +110,9 @@ export function AgentAuditGrid({ data, isLoading, onRefresh }: AgentAuditGridPro
 
           return (
             <div className="flex items-center h-full">
-              <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-mono font-medium border ${badgeClass}`}>
+              <span
+                className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-mono font-medium border ${badgeClass}`}
+              >
                 <Icon className="h-3 w-3" />
                 {state}
               </span>
@@ -111,22 +124,28 @@ export function AgentAuditGrid({ data, isLoading, onRefresh }: AgentAuditGridPro
         headerName: "PayPal Auth ID",
         field: "authorization_id",
         minWidth: 150,
-        cellRenderer: (params: any) => {
+        cellRenderer: (params: ICellRendererParams<AgentAuditRow>) => {
           const val = params.value;
           if (!val) return <span className="text-muted-foreground text-xs italic">Unassigned</span>;
           const short = val.length > 12 ? `${val.slice(0, 7)}…${val.slice(-4)}` : val;
-          return <span className="font-mono text-xs text-foreground bg-accent/60 px-1.5 py-0.5 rounded border border-border/50">{short}</span>;
+          return (
+            <span className="font-mono text-xs text-foreground bg-accent/60 px-1.5 py-0.5 rounded border border-border/50">
+              {short}
+            </span>
+          );
         },
       },
       {
         headerName: "Logistics Proof Hash",
         field: "logistics_proof_hash",
         minWidth: 160,
-        cellRenderer: (params: any) => {
+        cellRenderer: (params: ICellRendererParams<AgentAuditRow>) => {
           const val = params.value || "PENDING";
           const isVerified = val.includes("verified");
           return (
-            <span className={`font-mono text-[11px] px-1.5 py-0.5 rounded border ${isVerified ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-500" : "bg-muted text-muted-foreground border-border"}`}>
+            <span
+              className={`font-mono text-[11px] px-1.5 py-0.5 rounded border ${isVerified ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-500" : "bg-muted text-muted-foreground border-border"}`}
+            >
               {val}
             </span>
           );
@@ -135,12 +154,15 @@ export function AgentAuditGrid({ data, isLoading, onRefresh }: AgentAuditGridPro
     ];
   }, []);
 
-  const defaultColDef = useMemo<ColDef>(() => ({
-    sortable: true,
-    filter: true,
-    resizable: true,
-    flex: 1,
-  }), []);
+  const defaultColDef = useMemo<ColDef>(
+    () => ({
+      sortable: true,
+      filter: true,
+      resizable: true,
+      flex: 1,
+    }),
+    [],
+  );
 
   const onRowSelected = (e: RowSelectedEvent<AgentAuditRow>) => {
     if (e.node.isSelected() && e.data) {

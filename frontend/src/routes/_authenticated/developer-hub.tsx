@@ -12,7 +12,11 @@ import { Terminal, Code2, Download, ShieldCheck, Key, RefreshCw, Cpu } from "luc
 import { AppShell } from "@/components/omni/AppShell";
 import { Panel } from "@/components/omni/ui";
 import { CodeSnippet } from "@/components/developer/CodeSnippet";
-import { PYTHON_SDK_EXAMPLE, TYPESCRIPT_SDK_EXAMPLE, IDEMPOTENCY_EXAMPLE } from "@/lib/sdk-examples";
+import {
+  PYTHON_SDK_EXAMPLE,
+  TYPESCRIPT_SDK_EXAMPLE,
+  IDEMPOTENCY_EXAMPLE,
+} from "@/lib/sdk-examples";
 
 export const Route = createFileRoute("/_authenticated/developer-hub")({
   head: () => ({
@@ -20,10 +24,14 @@ export const Route = createFileRoute("/_authenticated/developer-hub")({
       { title: "Agent Developer Hub — OmniTrust" },
       {
         name: "description",
-        content: "Integrate autonomous buyer and seller agents with APIMatic SDKs and OpenAPI specs.",
+        content:
+          "Integrate autonomous buyer and seller agents with APIMatic SDKs and OpenAPI specs.",
       },
       { property: "og:title", content: "Agent Developer Hub — OmniTrust" },
-      { property: "og:description", content: "SDKs, code snippets, and API specs for agentic commerce." },
+      {
+        property: "og:description",
+        content: "SDKs, code snippets, and API specs for agentic commerce.",
+      },
       { property: "og:type", content: "website" },
     ],
   }),
@@ -58,7 +66,8 @@ function DeveloperHub() {
               <span>APIMatic SDK Generation</span>
             </div>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              OpenAPI 3.0 specs generate strongly-typed Python and TypeScript SDKs with built-in retry and telemetry.
+              OpenAPI 3.0 specs generate strongly-typed Python and TypeScript SDKs with built-in
+              retry and telemetry.
             </p>
           </div>
           <div className="rounded-lg border border-border bg-card p-4">
@@ -67,7 +76,8 @@ function DeveloperHub() {
               <span>PayPal Authorization Hold</span>
             </div>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              Agents recommend pricing; PayPal holds authorized funds; release is gated by verified delivery evidence.
+              Agents recommend pricing; PayPal holds authorized funds; release is gated by verified
+              delivery evidence.
             </p>
           </div>
           <div className="rounded-lg border border-border bg-card p-4">
@@ -76,7 +86,8 @@ function DeveloperHub() {
               <span>Zero Credential Leakage</span>
             </div>
             <p className="text-xs text-muted-foreground leading-relaxed">
-              Agents authenticate via OmniTrust scoped JWTs; PayPal client secrets never reach external code.
+              Agents authenticate via OmniTrust scoped JWTs; PayPal client secrets never reach
+              external code.
             </p>
           </div>
         </div>
@@ -123,27 +134,43 @@ function DeveloperHub() {
             {activeTab === "python" && (
               <div className="space-y-2">
                 <p className="text-xs text-muted-foreground">
-                  The Python client enables external LLM agents (LangChain, CrewAI, AutoGen) to conduct negotiation within policy caps and track PayPal escrow holds.
+                  The Python client enables external LLM agents (LangChain, CrewAI, AutoGen) to
+                  conduct negotiation within policy caps and track PayPal escrow holds.
                 </p>
-                <CodeSnippet code={PYTHON_SDK_EXAMPLE} language="python" title="omnitrust_agent.py" />
+                <CodeSnippet
+                  code={PYTHON_SDK_EXAMPLE}
+                  language="python"
+                  title="omnitrust_agent.py"
+                />
               </div>
             )}
 
             {activeTab === "typescript" && (
               <div className="space-y-2">
                 <p className="text-xs text-muted-foreground">
-                  The TypeScript SDK provides end-to-end typed promises for frontend or Node.js agent runners.
+                  The TypeScript SDK provides end-to-end typed promises for frontend or Node.js
+                  agent runners.
                 </p>
-                <CodeSnippet code={TYPESCRIPT_SDK_EXAMPLE} language="typescript" title="agent-runner.ts" />
+                <CodeSnippet
+                  code={TYPESCRIPT_SDK_EXAMPLE}
+                  language="typescript"
+                  title="agent-runner.ts"
+                />
               </div>
             )}
 
             {activeTab === "idempotency" && (
               <div className="space-y-2">
                 <p className="text-xs text-muted-foreground">
-                  Pass an <code>Idempotency-Key</code> header with every mutating request. Duplicate network calls will safely return existing transactions without creating double holds.
+                  Pass an <code>Idempotency-Key</code> header with every mutating request. Duplicate
+                  network calls will safely return existing transactions without creating double
+                  holds.
                 </p>
-                <CodeSnippet code={IDEMPOTENCY_EXAMPLE} language="typescript" title="idempotent-request.ts" />
+                <CodeSnippet
+                  code={IDEMPOTENCY_EXAMPLE}
+                  language="typescript"
+                  title="idempotent-request.ts"
+                />
               </div>
             )}
           </div>
@@ -153,13 +180,13 @@ function DeveloperHub() {
         <div className="grid gap-6 sm:grid-cols-2">
           <Panel title="OpenAPI 3.0 Specification">
             <p className="text-xs text-muted-foreground leading-relaxed mb-4">
-              OmniTrust publishes a versioned OpenAPI 3.0 specification covering Negotiations, Orders, PayPal Payments, Webhooks, and Audit Telemetry.
+              OmniTrust publishes a versioned OpenAPI 3.0 specification covering Negotiations,
+              Orders, PayPal Payments, Webhooks, and Audit Telemetry.
             </p>
             <div className="flex flex-wrap gap-2">
               <a
-                href="http://localhost:8000/openapi.json"
-                target="_blank"
-                rel="noreferrer"
+                href="/openapi.json"
+                download="omnitrust-openapi.json"
                 className="inline-flex items-center gap-1.5 rounded-md border border-border bg-card px-3 py-2 text-xs font-medium text-foreground hover:bg-accent"
               >
                 <Download className="h-3.5 w-3.5 text-primary" />
@@ -179,13 +206,16 @@ function DeveloperHub() {
           <Panel title="Agent Spending Guardrails">
             <div className="space-y-2 text-xs text-muted-foreground">
               <p>
-                <strong>Max Turns:</strong> Negotiations automatically terminate after 4 turns to avoid infinite loops.
+                <strong>Max Turns:</strong> Negotiations automatically terminate after 4 turns to
+                avoid infinite loops.
               </p>
               <p>
-                <strong>Order Cap:</strong> No order may exceed the configured account spend ceiling.
+                <strong>Order Cap:</strong> No order may exceed the configured account spend
+                ceiling.
               </p>
               <p>
-                <strong>Settlement Gate:</strong> Release to seller strictly requires cryptographic delivery proof from mock logistics.
+                <strong>Settlement Gate:</strong> Release to seller strictly requires cryptographic
+                delivery proof from mock logistics.
               </p>
             </div>
           </Panel>

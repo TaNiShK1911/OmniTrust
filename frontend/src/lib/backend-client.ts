@@ -11,7 +11,8 @@
 import { supabase } from "@/integrations/supabase/client";
 
 const BACKEND_URL =
-  (typeof import.meta !== "undefined" && (import.meta as unknown as Record<string, Record<string, string>>).env?.VITE_BACKEND_URL) ||
+  (typeof import.meta !== "undefined" &&
+    (import.meta as unknown as Record<string, Record<string, string>>).env?.VITE_BACKEND_URL) ||
   "http://localhost:8000";
 
 export type BackendEnvelope<T = unknown> = {
@@ -66,21 +67,21 @@ export async function callBackend<T = unknown>(
   try {
     envelope = (await res.json()) as BackendEnvelope<T>;
   } catch {
-    throw new BackendError("PARSE_ERROR", `Backend returned non-JSON (status ${res.status})`, res.status);
+    throw new BackendError(
+      "PARSE_ERROR",
+      `Backend returned non-JSON (status ${res.status})`,
+      res.status,
+    );
   }
 
   if (!res.ok || !envelope.success) {
     const err = envelope.error;
-    const detail = (envelope as any).detail;
+    const detail = (envelope as unknown as { detail?: string | { message?: string } }).detail;
     const msg =
       err?.message ??
       (typeof detail === "string" ? detail : detail?.message) ??
       `Backend error (status ${res.status})`;
-    throw new BackendError(
-      err?.code ?? "BACKEND_ERROR",
-      msg,
-      res.status,
-    );
+    throw new BackendError(err?.code ?? "BACKEND_ERROR", msg, res.status);
   }
 
   return envelope;
