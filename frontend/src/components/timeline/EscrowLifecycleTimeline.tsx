@@ -77,8 +77,8 @@ export function EscrowLifecycleTimeline({ milestones, orderId }: EscrowLifecycle
           </p>
         </div>
         <div className="inline-flex items-center gap-1.5 rounded border border-border bg-card px-2.5 py-1 text-[11px] font-mono text-muted-foreground">
-          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-          Bryntum Scheduler Ready
+          <span className="h-1.5 w-1.5 rounded-full bg-blue-500" />
+          Custom React Fallback (Bryntum Schema Compatible)
         </div>
       </div>
 
@@ -166,6 +166,20 @@ export function EscrowLifecycleTimeline({ milestones, orderId }: EscrowLifecycle
           })}
         </div>
       )}
+
+      {/* Bryntum Licensing Boundary Disclosure */}
+      <div className="flex items-start gap-2 rounded-lg border border-border/60 bg-muted/30 p-3 text-xs text-muted-foreground">
+        <Info className="h-4 w-4 shrink-0 text-muted-foreground mt-0.5" />
+        <div>
+          <span className="font-medium text-foreground">Timeline Rendering Mode: </span>
+          Custom React Fallback. OmniTrust standardizes lifecycle events via the Bryntum EventModel
+          schema using{" "}
+          <code className="font-mono text-[11px] text-foreground">toBryntumEvents()</code>. Full
+          commercial Bryntum Scheduler / TaskBoard widgets require an active commercial license and
+          authenticated private npm registry access (
+          <code className="font-mono text-[11px] text-foreground">npm.bryntum.com</code>).
+        </div>
+      </div>
     </div>
   );
 }

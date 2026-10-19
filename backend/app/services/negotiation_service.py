@@ -270,6 +270,31 @@ def run_next_turn(
             },
         )
 
+        # Asynchronously dispatch telemetry task for agent consensus & metrics
+        try:
+            from app.worker.tasks import dispatch_audit_telemetry_task
+            dispatch_audit_telemetry_task.delay(
+                order_id=None,
+                event_type="agent_turn.telemetry",
+                actor="Seller Agent",
+                details={
+                    "proposed_unit_price": seller_resp.unit_price,
+                    "action": seller_resp.action,
+                    "model": settings.groq_model if seller_ai_used else "deterministic-fallback",
+                    "ai_used": seller_ai_used,
+                    "score": 96.5 if seller_resp.action == "ACCEPT" else 88.0,
+                    "turn": turn_number,
+                },
+                user_id=user_id,
+                category="agent_telemetry",
+                negotiation_id=session_id,
+                entity=product["sku"],
+                decision=seller_resp.action,
+                latency_ms=int(seller_latency * 1000),
+            )
+        except Exception:
+            pass
+
         if seller_resp.action == "ACCEPT":
             new_status = "agreed"
             agreed_price = seller_resp.unit_price

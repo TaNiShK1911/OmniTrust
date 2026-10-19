@@ -43,14 +43,48 @@ export interface BryntumEventModel {
 }
 
 export function toBryntumEvents(milestones: LifecycleMilestone[]): BryntumEventModel[] {
-  return milestones.map((m) => ({
-    id: m.id,
-    name: m.title,
-    startDate: m.timestamp,
-    resourceId: m.actor,
-    eventType: m.type,
-    status: m.status,
-    proofHash: m.proof_hash,
-    referenceId: m.reference_id,
-  }));
+  if (!Array.isArray(milestones)) {
+    return [];
+  }
+
+  return milestones.map((m, idx) => {
+    // Sanitize or recover malformed/missing ISO timestamps
+    let validStartDate: string;
+    try {
+      if (m.timestamp && !isNaN(Date.parse(m.timestamp))) {
+        validStartDate = new Date(m.timestamp).toISOString();
+      } else {
+        // Fallback to Unix epoch for invalid or missing timestamps
+        validStartDate = new Date(0).toISOString();
+      }
+    } catch {
+      validStartDate = new Date(0).toISOString();
+    }
+
+    // Parse optional endDate if available in milestone details
+    let validEndDate: string | undefined = undefined;
+    if (
+      m.details &&
+      typeof m.details.end_date === "string" &&
+      !isNaN(Date.parse(m.details.end_date))
+    ) {
+      try {
+        validEndDate = new Date(m.details.end_date).toISOString();
+      } catch {
+        validEndDate = undefined;
+      }
+    }
+
+    return {
+      id: m.id || `milestone-${idx}`,
+      name: m.title || "Milestone",
+      startDate: validStartDate,
+      endDate: validEndDate,
+      resourceId: m.actor || "system",
+      eventType: m.type,
+      status: m.status || "pending",
+      proofHash: m.proof_hash,
+      referenceId: m.reference_id,
+    };
+  });
 }

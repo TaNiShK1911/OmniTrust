@@ -195,7 +195,34 @@ async def logistics_webhook(request: Request):
 
     # ── Step 7: Settlement (DELIVERED path) ───────────────────────────────────
     if delivered:
-        settlement_service.settle_order(db, order_id=order_id, user_id=user_id)
+        try:
+            from app.worker.tasks import process_settlement_capture_task
+            task = process_settlement_capture_task.delay(order_id=order_id, user_id=user_id)
+            log_event(
+                db,
+                user_id=user_id,
+                order_id=order_id,
+                category="settlement",
+                event_type="settlement.task_dispatched",
+                actor="OmniTrust Worker",
+                entity=tracking_id,
+                decision="ASYNC_SETTLEMENT_ENQUEUED",
+                payload={"task_id": getattr(task, "id", None), "order_id": order_id},
+            )
+        except Exception as exc:
+            # Fallback to synchronous settlement if task submission fails
+            log_event(
+                db,
+                user_id=user_id,
+                order_id=order_id,
+                category="settlement",
+                event_type="settlement.dispatch_fallback",
+                actor="OmniTrust Webhook",
+                status="warning",
+                decision="SYNC_FALLBACK_EXECUTED",
+                payload={"error": str(exc), "order_id": order_id},
+            )
+            settlement_service.settle_order(db, order_id=order_id, user_id=user_id)
 
     # ── Step 8: Dispute (DAMAGED path) ───────────────────────────────────────
     else:

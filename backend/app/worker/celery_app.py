@@ -30,9 +30,15 @@ celery_app.conf.update(
     worker_prefetch_multiplier=1,
     task_acks_late=True,        # Resilient to worker crashes
     broker_connection_retry_on_startup=True,
+    task_default_queue="default",
+    task_create_missing_queues=True,
     task_routes={
         "app.worker.tasks.process_settlement_capture_task": {"queue": "settlements"},
         "app.worker.tasks.dispatch_audit_telemetry_task": {"queue": "telemetry"},
         "app.worker.tasks.ping_worker_task": {"queue": "default"},
     },
 )
+
+# Standard aliases for Celery CLI discovery
+app = celery_app
+celery = celery_app

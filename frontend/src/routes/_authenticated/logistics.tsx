@@ -99,7 +99,7 @@ function Logistics() {
         </Panel>
 
         {shipments.length > 0 && (
-          <Panel title="Escrow & Logistics Milestone Timeline (Bryntum-Compatible)">
+          <Panel title="Escrow & Logistics Milestone Timeline (Custom Fallback, Bryntum-Compatible)">
             <EscrowLifecycleTimeline
               milestones={[
                 {

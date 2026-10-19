@@ -8,9 +8,7 @@
   "paths": {
     "/api/health": {
       "get": {
-        "tags": [
-          "health"
-        ],
+        "tags": ["health"],
         "summary": "Health",
         "operationId": "health_api_health_get",
         "responses": {
@@ -25,9 +23,7 @@
         }
       },
       "head": {
-        "tags": [
-          "health"
-        ],
+        "tags": ["health"],
         "summary": "Health",
         "operationId": "health_api_health_head",
         "responses": {
@@ -44,9 +40,7 @@
     },
     "/health": {
       "get": {
-        "tags": [
-          "health"
-        ],
+        "tags": ["health"],
         "summary": "Health",
         "operationId": "health_health_get",
         "responses": {
@@ -61,9 +55,7 @@
         }
       },
       "head": {
-        "tags": [
-          "health"
-        ],
+        "tags": ["health"],
         "summary": "Health",
         "operationId": "health_health_head",
         "responses": {
@@ -80,9 +72,7 @@
     },
     "/": {
       "get": {
-        "tags": [
-          "health"
-        ],
+        "tags": ["health"],
         "summary": "Health",
         "operationId": "health__get",
         "responses": {
@@ -97,9 +87,7 @@
         }
       },
       "head": {
-        "tags": [
-          "health"
-        ],
+        "tags": ["health"],
         "summary": "Health",
         "operationId": "health__head",
         "responses": {
@@ -116,9 +104,7 @@
     },
     "/api/health/dependencies": {
       "get": {
-        "tags": [
-          "health"
-        ],
+        "tags": ["health"],
         "summary": "Dependency Health",
         "operationId": "dependency_health_api_health_dependencies_get",
         "responses": {
@@ -135,9 +121,7 @@
     },
     "/api/v1/agents/register": {
       "post": {
-        "tags": [
-          "agents"
-        ],
+        "tags": ["agents"],
         "summary": "Register External Agent",
         "description": "Mock identity/mandate step for an external AI agent.\nIssues a short-lived token scoped to \"agent-buyer\".",
         "operationId": "register_external_agent_api_v1_agents_register_post",
@@ -175,9 +159,7 @@
     },
     "/api/v1/auth/me": {
       "get": {
-        "tags": [
-          "auth"
-        ],
+        "tags": ["auth"],
         "summary": "Get Me",
         "operationId": "get_me_api_v1_auth_me_get",
         "parameters": [
@@ -222,9 +204,7 @@
     },
     "/api/v1/auth/profile": {
       "get": {
-        "tags": [
-          "auth"
-        ],
+        "tags": ["auth"],
         "summary": "Get Profile",
         "operationId": "get_profile_api_v1_auth_profile_get",
         "parameters": [
@@ -267,9 +247,7 @@
         }
       },
       "post": {
-        "tags": [
-          "auth"
-        ],
+        "tags": ["auth"],
         "summary": "Upsert Profile",
         "operationId": "upsert_profile_api_v1_auth_profile_post",
         "parameters": [
@@ -324,9 +302,7 @@
     },
     "/api/v1/auth/logout": {
       "post": {
-        "tags": [
-          "auth"
-        ],
+        "tags": ["auth"],
         "summary": "Logout",
         "description": "Server-side audit only — actual Supabase sign-out is done by the client.",
         "operationId": "logout_api_v1_auth_logout_post",
@@ -372,9 +348,7 @@
     },
     "/api/v1/auth/demo-login": {
       "post": {
-        "tags": [
-          "auth"
-        ],
+        "tags": ["auth"],
         "summary": "Demo Login",
         "description": "Dev-only: return seeded demo credentials.\nDisabled outside development environments.",
         "operationId": "demo_login_api_v1_auth_demo_login_post",
@@ -392,9 +366,7 @@
     },
     "/api/v1/metrics/kpi": {
       "get": {
-        "tags": [
-          "metrics"
-        ],
+        "tags": ["metrics"],
         "summary": "Get Kpis",
         "operationId": "get_kpis_api_v1_metrics_kpi_get",
         "parameters": [
@@ -439,9 +411,7 @@
     },
     "/api/v1/products": {
       "get": {
-        "tags": [
-          "products"
-        ],
+        "tags": ["products"],
         "summary": "List Products",
         "operationId": "list_products_api_v1_products_get",
         "parameters": [
@@ -523,9 +493,7 @@
         }
       },
       "post": {
-        "tags": [
-          "products"
-        ],
+        "tags": ["products"],
         "summary": "Create Product",
         "operationId": "create_product_api_v1_products_post",
         "parameters": [
@@ -580,9 +548,7 @@
     },
     "/api/v1/products/{product_id}": {
       "get": {
-        "tags": [
-          "products"
-        ],
+        "tags": ["products"],
         "summary": "Get Product",
         "operationId": "get_product_api_v1_products__product_id__get",
         "parameters": [
@@ -634,9 +600,7 @@
         }
       },
       "patch": {
-        "tags": [
-          "products"
-        ],
+        "tags": ["products"],
         "summary": "Update Product",
         "operationId": "update_product_api_v1_products__product_id__patch",
         "parameters": [
@@ -700,9 +664,7 @@
     },
     "/api/v1/negotiations": {
       "post": {
-        "tags": [
-          "negotiations"
-        ],
+        "tags": ["negotiations"],
         "summary": "Create Negotiation",
         "operationId": "create_negotiation_api_v1_negotiations_post",
         "parameters": [
@@ -757,9 +719,7 @@
     },
     "/api/v1/negotiations/{session_id}": {
       "get": {
-        "tags": [
-          "negotiations"
-        ],
+        "tags": ["negotiations"],
         "summary": "Get Negotiation",
         "operationId": "get_negotiation_api_v1_negotiations__session_id__get",
         "parameters": [
@@ -813,9 +773,7 @@
     },
     "/api/v1/negotiations/{session_id}/turns": {
       "get": {
-        "tags": [
-          "negotiations"
-        ],
+        "tags": ["negotiations"],
         "summary": "Get Turns",
         "operationId": "get_turns_api_v1_negotiations__session_id__turns_get",
         "parameters": [
@@ -869,9 +827,7 @@
     },
     "/api/v1/negotiations/{session_id}/next-turn": {
       "post": {
-        "tags": [
-          "negotiations"
-        ],
+        "tags": ["negotiations"],
         "summary": "Next Turn",
         "operationId": "next_turn_api_v1_negotiations__session_id__next_turn_post",
         "parameters": [
@@ -925,9 +881,7 @@
     },
     "/api/v1/negotiations/{session_id}/approve": {
       "post": {
-        "tags": [
-          "negotiations"
-        ],
+        "tags": ["negotiations"],
         "summary": "Approve Negotiation",
         "operationId": "approve_negotiation_api_v1_negotiations__session_id__approve_post",
         "parameters": [
@@ -981,9 +935,7 @@
     },
     "/api/v1/negotiations/{session_id}/cancel": {
       "post": {
-        "tags": [
-          "negotiations"
-        ],
+        "tags": ["negotiations"],
         "summary": "Cancel Negotiation",
         "operationId": "cancel_negotiation_api_v1_negotiations__session_id__cancel_post",
         "parameters": [
@@ -1037,9 +989,7 @@
     },
     "/api/v1/orders/from-negotiation/{session_id}": {
       "post": {
-        "tags": [
-          "orders"
-        ],
+        "tags": ["orders"],
         "summary": "Create From Negotiation",
         "operationId": "create_from_negotiation_api_v1_orders_from_negotiation__session_id__post",
         "parameters": [
@@ -1093,9 +1043,7 @@
     },
     "/api/v1/orders": {
       "get": {
-        "tags": [
-          "orders"
-        ],
+        "tags": ["orders"],
         "summary": "List Orders",
         "operationId": "list_orders_api_v1_orders_get",
         "parameters": [
@@ -1179,9 +1127,7 @@
     },
     "/api/v1/orders/{order_id}": {
       "get": {
-        "tags": [
-          "orders"
-        ],
+        "tags": ["orders"],
         "summary": "Get Order",
         "operationId": "get_order_api_v1_orders__order_id__get",
         "parameters": [
@@ -1235,9 +1181,7 @@
     },
     "/api/v1/orders/{order_id}/cancel": {
       "post": {
-        "tags": [
-          "orders"
-        ],
+        "tags": ["orders"],
         "summary": "Cancel Order",
         "operationId": "cancel_order_api_v1_orders__order_id__cancel_post",
         "parameters": [
@@ -1291,9 +1235,7 @@
     },
     "/api/v1/orders/{order_id}/timeline": {
       "get": {
-        "tags": [
-          "orders"
-        ],
+        "tags": ["orders"],
         "summary": "Get Timeline",
         "description": "Frontend-optimised chronological audit trail for one order.",
         "operationId": "get_timeline_api_v1_orders__order_id__timeline_get",
@@ -1348,9 +1290,7 @@
     },
     "/api/v1/orders/{order_id}/paypal-order": {
       "post": {
-        "tags": [
-          "payments"
-        ],
+        "tags": ["payments"],
         "summary": "Create Paypal Order",
         "description": "Step 1: Initiate PayPal order with intent=AUTHORIZE.\nReturns the PayPal Order ID and buyer approval URL.",
         "operationId": "create_paypal_order_api_v1_orders__order_id__paypal_order_post",
@@ -1405,9 +1345,7 @@
     },
     "/api/v1/orders/{order_id}/authorize": {
       "post": {
-        "tags": [
-          "payments"
-        ],
+        "tags": ["payments"],
         "summary": "Authorize Paypal Order",
         "description": "Step 2: Authorize funds for an order after buyer approval.",
         "operationId": "authorize_paypal_order_api_v1_orders__order_id__authorize_post",
@@ -1472,9 +1410,7 @@
     },
     "/api/v1/orders/{order_id}/payment": {
       "get": {
-        "tags": [
-          "payments"
-        ],
+        "tags": ["payments"],
         "summary": "Get Payment Status",
         "description": "Retrieve canonical payment state and authorization/capture references.",
         "operationId": "get_payment_status_api_v1_orders__order_id__payment_get",
@@ -1529,9 +1465,7 @@
     },
     "/api/v1/orders/{order_id}/capture": {
       "post": {
-        "tags": [
-          "payments"
-        ],
+        "tags": ["payments"],
         "summary": "Capture Payment",
         "description": "Capture authorized payment after settlement checks pass.",
         "operationId": "capture_payment_api_v1_orders__order_id__capture_post",
@@ -1586,9 +1520,7 @@
     },
     "/api/v1/orders/{order_id}/void": {
       "post": {
-        "tags": [
-          "payments"
-        ],
+        "tags": ["payments"],
         "summary": "Void Payment",
         "description": "Void uncaptured authorization (all-or-nothing).",
         "operationId": "void_payment_api_v1_orders__order_id__void_post",
@@ -1643,9 +1575,7 @@
     },
     "/api/v1/orders/{order_id}/escrow": {
       "post": {
-        "tags": [
-          "payments"
-        ],
+        "tags": ["payments"],
         "summary": "Create Escrow Compat",
         "description": "Deprecated compatibility route: creates PayPal order.",
         "operationId": "create_escrow_compat_api_v1_orders__order_id__escrow_post",
@@ -1699,9 +1629,7 @@
         }
       },
       "get": {
-        "tags": [
-          "payments"
-        ],
+        "tags": ["payments"],
         "summary": "Get Escrow Compat",
         "description": "Deprecated compatibility route: returns payment status.",
         "operationId": "get_escrow_compat_api_v1_orders__order_id__escrow_get",
@@ -1757,9 +1685,7 @@
     },
     "/api/v1/orders/{order_id}/shipment": {
       "post": {
-        "tags": [
-          "shipments"
-        ],
+        "tags": ["shipments"],
         "summary": "Create Shipment",
         "operationId": "create_shipment_api_v1_orders__order_id__shipment_post",
         "parameters": [
@@ -1813,9 +1739,7 @@
     },
     "/api/v1/shipments": {
       "get": {
-        "tags": [
-          "shipments"
-        ],
+        "tags": ["shipments"],
         "summary": "List Shipments",
         "operationId": "list_shipments_api_v1_shipments_get",
         "parameters": [
@@ -1860,9 +1784,7 @@
     },
     "/api/v1/shipments/{tracking_id}": {
       "get": {
-        "tags": [
-          "shipments"
-        ],
+        "tags": ["shipments"],
         "summary": "Get Shipment",
         "operationId": "get_shipment_api_v1_shipments__tracking_id__get",
         "parameters": [
@@ -1916,9 +1838,7 @@
     },
     "/api/v1/orders/{order_id}/settle": {
       "post": {
-        "tags": [
-          "disputes"
-        ],
+        "tags": ["disputes"],
         "summary": "Settle Order",
         "operationId": "settle_order_api_v1_orders__order_id__settle_post",
         "parameters": [
@@ -1972,9 +1892,7 @@
     },
     "/api/v1/orders/{order_id}/settlement": {
       "get": {
-        "tags": [
-          "disputes"
-        ],
+        "tags": ["disputes"],
         "summary": "Get Settlement",
         "operationId": "get_settlement_api_v1_orders__order_id__settlement_get",
         "parameters": [
@@ -2028,9 +1946,7 @@
     },
     "/api/v1/orders/{order_id}/disputes": {
       "post": {
-        "tags": [
-          "disputes"
-        ],
+        "tags": ["disputes"],
         "summary": "Create Dispute",
         "operationId": "create_dispute_api_v1_orders__order_id__disputes_post",
         "parameters": [
@@ -2084,9 +2000,7 @@
     },
     "/api/v1/disputes/{dispute_id}": {
       "get": {
-        "tags": [
-          "disputes"
-        ],
+        "tags": ["disputes"],
         "summary": "Get Dispute",
         "operationId": "get_dispute_api_v1_disputes__dispute_id__get",
         "parameters": [
@@ -2140,9 +2054,7 @@
     },
     "/api/v1/disputes/{dispute_id}/arbitrate": {
       "post": {
-        "tags": [
-          "disputes"
-        ],
+        "tags": ["disputes"],
         "summary": "Arbitrate",
         "operationId": "arbitrate_api_v1_disputes__dispute_id__arbitrate_post",
         "parameters": [
@@ -2196,9 +2108,7 @@
     },
     "/api/v1/disputes/{dispute_id}/refund": {
       "post": {
-        "tags": [
-          "disputes"
-        ],
+        "tags": ["disputes"],
         "summary": "Execute Refund",
         "operationId": "execute_refund_api_v1_disputes__dispute_id__refund_post",
         "parameters": [
@@ -2252,9 +2162,7 @@
     },
     "/api/v1/orders/{order_id}/refunds": {
       "get": {
-        "tags": [
-          "disputes"
-        ],
+        "tags": ["disputes"],
         "summary": "Get Refunds",
         "operationId": "get_refunds_api_v1_orders__order_id__refunds_get",
         "parameters": [
@@ -2308,9 +2216,7 @@
     },
     "/api/audit/logs": {
       "get": {
-        "tags": [
-          "audit"
-        ],
+        "tags": ["audit"],
         "summary": "List Audit Logs",
         "operationId": "list_audit_logs_api_audit_logs_get",
         "parameters": [
@@ -2431,9 +2337,7 @@
     },
     "/api/audit/logs/{event_id}": {
       "get": {
-        "tags": [
-          "audit"
-        ],
+        "tags": ["audit"],
         "summary": "Get Audit Log",
         "operationId": "get_audit_log_api_audit_logs__event_id__get",
         "parameters": [
@@ -2487,9 +2391,7 @@
     },
     "/api/audit/command-center": {
       "get": {
-        "tags": [
-          "audit"
-        ],
+        "tags": ["audit"],
         "summary": "Get Command Center Telemetry",
         "description": "Returns structured data for AG Grid Agentic Audit Command Center:\nOrder ID, Buyer Bid, Seller Counteroffer, Consensus Score,\nLogistics Proof Hash, Canonical Payment State, and PayPal Authorization ID.",
         "operationId": "get_command_center_telemetry_api_audit_command_center_get",
@@ -2558,9 +2460,7 @@
     },
     "/api/v1/catalog/agent-feed/manifest": {
       "get": {
-        "tags": [
-          "catalog"
-        ],
+        "tags": ["catalog"],
         "summary": "Get Catalog Manifest",
         "description": "Returns capabilities that an external AI agent can discover and use.",
         "operationId": "get_catalog_manifest_api_v1_catalog_agent_feed_manifest_get",
@@ -2578,9 +2478,7 @@
     },
     "/api/v1/catalog/agent-feed": {
       "get": {
-        "tags": [
-          "catalog"
-        ],
+        "tags": ["catalog"],
         "summary": "Get Agent Feed",
         "description": "Returns the product catalog in a machine-readable JSON-LD format.\nNever exposes `price_floor` to external agents.",
         "operationId": "get_agent_feed_api_v1_catalog_agent_feed_get",
@@ -2649,9 +2547,7 @@
     },
     "/api/webhooks/logistics": {
       "post": {
-        "tags": [
-          "webhooks"
-        ],
+        "tags": ["webhooks"],
         "summary": "Logistics Webhook",
         "description": "Process a signed logistics event.\n\nProcessing order (hard-coded, not configurable):\n  1. Verify HMAC signature → 401 if invalid\n  2. Parse payload\n  3. Validate tracking/order association → 404 if unknown\n  4. Check idempotency → 200 no-op if already seen\n  5. Persist raw event\n  6. Update shipment + order status\n  7. If DELIVERED → run settlement gate → settle\n  8. If DAMAGED → create dispute\n  9. Return 200 only after durable write",
         "operationId": "logistics_webhook_api_webhooks_logistics_post",
@@ -2669,9 +2565,7 @@
     },
     "/api/webhooks/paypal": {
       "post": {
-        "tags": [
-          "PayPal Webhooks"
-        ],
+        "tags": ["PayPal Webhooks"],
         "summary": "Handle Paypal Webhook",
         "description": "Handle PayPal webhook notifications.\nValidates signature via PayPal API and applies state machine transitions.",
         "operationId": "handle_paypal_webhook_api_webhooks_paypal_post",
@@ -2800,10 +2694,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "agent_name",
-          "spending_cap"
-        ],
+        "required": ["agent_name", "spending_cap"],
         "title": "AgentRegisterRequest"
       },
       "AuthorizeRequest": {
@@ -2814,9 +2705,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "paypal_order_id"
-        ],
+        "required": ["paypal_order_id"],
         "title": "AuthorizeRequest"
       },
       "HTTPValidationError": {
@@ -2874,13 +2763,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "sku",
-          "name",
-          "list_price",
-          "price_floor",
-          "stock"
-        ],
+        "required": ["sku", "name", "list_price", "price_floor", "stock"],
         "title": "ProductCreate"
       },
       "ProductPatch": {
@@ -3034,10 +2917,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "product_id",
-          "quantity"
-        ],
+        "required": ["product_id", "quantity"],
         "title": "StartNegotiationBody"
       },
       "ValidationError": {
@@ -3066,11 +2946,7 @@
           }
         },
         "type": "object",
-        "required": [
-          "loc",
-          "msg",
-          "type"
-        ],
+        "required": ["loc", "msg", "type"],
         "title": "ValidationError"
       }
     }
