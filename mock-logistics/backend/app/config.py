@@ -21,4 +21,4 @@ class Settings(BaseSettings):
 # for ease of hackathon dev
 settings = Settings()
 if settings.logistics_webhook_secret == "change-me":
-    settings.logistics_webhook_secret = os.getenv("LOGISTICS_WEBHOOK_SECRET", "razorpay_hackathon_secret_2026")
+    settings.logistics_webhook_secret = os.getenv("LOGISTICS_WEBHOOK_SECRET", "omnitrust_logistics_secret_2026")

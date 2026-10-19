@@ -34,13 +34,17 @@ class Settings(BaseSettings):
     groq_model: str = "openai/gpt-oss-20b"
     groq_arb_model: str = "openai/gpt-oss-20b"
 
-    # ── Razorpay ──────────────────────────────────────────────────────────────
-    razorpay_key_id: str = ""
-    razorpay_key_secret: str = ""
+    # ── PayPal Sandbox ────────────────────────────────────────────────────────
+    paypal_client_id: str = ""
+    paypal_client_secret: str = ""
+    paypal_base_url: str = "https://api-m.sandbox.paypal.com"
+    paypal_webhook_id: str = ""
+    paypal_return_url: str = "http://localhost:3000/paypal/return"
+    paypal_cancel_url: str = "http://localhost:3000/paypal/cancel"
 
     # ── Logistics ─────────────────────────────────────────────────────────────
     logistics_base_url: str = "http://localhost:5001"
-    logistics_webhook_secret: str = "razorpay_hackathon_secret_2026"
+    logistics_webhook_secret: str = "omnitrust_logistics_secret_2026"
 
     # ── Business rules ────────────────────────────────────────────────────────
     negotiation_max_turns: int = 4
@@ -62,12 +66,12 @@ class Settings(BaseSettings):
         return bool(self.groq_api_key and not self.groq_api_key.startswith("<"))
 
     @property
-    def razorpay_configured(self) -> bool:
+    def paypal_configured(self) -> bool:
         return bool(
-            self.razorpay_key_id
-            and not self.razorpay_key_id.startswith("<")
-            and self.razorpay_key_secret
-            and not self.razorpay_key_secret.startswith("<")
+            self.paypal_client_id
+            and not self.paypal_client_id.startswith("<")
+            and self.paypal_client_secret
+            and not self.paypal_client_secret.startswith("<")
         )
 
 
