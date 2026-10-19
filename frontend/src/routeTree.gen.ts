@@ -14,6 +14,7 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedCatalogRouteImport } from './routes/_authenticated/catalog'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedDeveloperHubRouteImport } from './routes/_authenticated/developer-hub'
 import { Route as AuthenticatedLogisticsRouteImport } from './routes/_authenticated/logistics'
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
@@ -49,6 +50,12 @@ const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedDeveloperHubRoute =
+  AuthenticatedDeveloperHubRouteImport.update({
+    id: '/developer-hub',
+    path: '/developer-hub',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedLogisticsRoute = AuthenticatedLogisticsRouteImport.update({
   id: '/logistics',
   path: '/logistics',
@@ -112,6 +119,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/catalog': typeof AuthenticatedCatalogRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/developer-hub': typeof AuthenticatedDeveloperHubRoute
   '/logistics': typeof AuthenticatedLogisticsRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/settings': typeof AuthenticatedSettingsRoute
@@ -128,6 +136,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/catalog': typeof AuthenticatedCatalogRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/developer-hub': typeof AuthenticatedDeveloperHubRoute
   '/logistics': typeof AuthenticatedLogisticsRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/settings': typeof AuthenticatedSettingsRoute
@@ -146,6 +155,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/_authenticated/catalog': typeof AuthenticatedCatalogRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/developer-hub': typeof AuthenticatedDeveloperHubRoute
   '/_authenticated/logistics': typeof AuthenticatedLogisticsRoute
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
@@ -164,6 +174,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/catalog'
     | '/dashboard'
+    | '/developer-hub'
     | '/logistics'
     | '/onboarding'
     | '/settings'
@@ -180,6 +191,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/catalog'
     | '/dashboard'
+    | '/developer-hub'
     | '/logistics'
     | '/onboarding'
     | '/settings'
@@ -197,6 +209,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/_authenticated/catalog'
     | '/_authenticated/dashboard'
+    | '/_authenticated/developer-hub'
     | '/_authenticated/logistics'
     | '/_authenticated/onboarding'
     | '/_authenticated/settings'
@@ -250,6 +263,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/developer-hub': {
+      id: '/_authenticated/developer-hub'
+      path: '/developer-hub'
+      fullPath: '/developer-hub'
+      preLoaderRoute: typeof AuthenticatedDeveloperHubRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/logistics': {
@@ -328,6 +348,7 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedCatalogRoute: typeof AuthenticatedCatalogRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedDeveloperHubRoute: typeof AuthenticatedDeveloperHubRoute
   AuthenticatedLogisticsRoute: typeof AuthenticatedLogisticsRoute
   AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
@@ -343,6 +364,7 @@ interface AuthenticatedRouteRouteChildren {
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedCatalogRoute: AuthenticatedCatalogRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedDeveloperHubRoute: AuthenticatedDeveloperHubRoute,
   AuthenticatedLogisticsRoute: AuthenticatedLogisticsRoute,
   AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,

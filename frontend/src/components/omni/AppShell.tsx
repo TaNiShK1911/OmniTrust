@@ -9,6 +9,7 @@ const NAV = [
   { to: "/catalog", label: "Catalog" },
   { to: "/orders", label: "Orders" },
   { to: "/logistics", label: "Logistics" },
+  { to: "/developer-hub", label: "Developer Hub" },
   { to: "/settings", label: "Settings" },
 ] as const;
 
@@ -37,7 +38,7 @@ export function AppShell({
           <Link to="/dashboard" className="font-display text-lg font-bold tracking-tight">
             Omni<span className="text-terminal">Trust</span>
           </Link>
-          <span className="label-mono border border-terminal px-2 py-1 text-terminal">Razorpay test mode</span>
+          <span className="label-mono border border-terminal px-2 py-1 text-terminal">PayPal Sandbox</span>
           <nav className="order-3 flex w-full flex-wrap gap-1 md:order-none md:w-auto">
             {NAV.map((item) => (
               <Link
