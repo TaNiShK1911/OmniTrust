@@ -1,98 +1,76 @@
-# OmniTrust Backend
+# OmniTrust Backend — PayPal Sandbox & Policy Guardrails
 
-FastAPI Python backend for the OmniTrust AI-native buyer/seller settlement platform.
+FastAPI Python backend powering autonomous agent commerce, PayPal Sandbox authorization hold workflows, deterministic release gates, and cryptographic webhook verification.
 
 ## Quick Start
 
 ### 1. Set up Python environment
 
 ```powershell
-# From the repo root (OmniTrust/)
-python -m venv backend\.venv
-backend\.venv\Scripts\pip install -r backend\requirements.txt
-```
-
-### 2. Configure environment
-
-```powershell
-Copy-Item backend\.env.example backend\.env
-# Edit backend\.env and fill in:
-#   SUPABASE_SERVICE_ROLE_KEY  (Supabase → Settings → API)
-#   SUPABASE_JWT_SECRET        (same page)
-#   GROQ_API_KEY               (console.groq.com)
-#   RAZORPAY_KEY_ID            (Razorpay test mode dashboard)
-#   RAZORPAY_KEY_SECRET        (same)
-```
-
-### 3. Start the Mock Logistics Service (port 5001)
-
-```powershell
-cd mock-logistics
 python -m venv .venv
 .\.venv\Scripts\pip install -r requirements.txt
-.\.venv\Scripts\python main.py
 ```
 
-### 4. Start the FastAPI backend (port 8000)
+### 2. Configure environment (`backend/.env`)
+
+```ini
+APP_ENV=development
+API_PORT=8000
+FRONTEND_ORIGIN=http://localhost:3000
+
+# Supabase
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_ANON_KEY=your_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+SUPABASE_JWT_SECRET=your_jwt_secret
+
+# Groq LLM
+GROQ_API_KEY=gsk_your_groq_key
+
+# PayPal Sandbox
+PAYPAL_CLIENT_ID=your_sandbox_client_id
+PAYPAL_CLIENT_SECRET=your_sandbox_client_secret
+PAYPAL_BASE_URL=https://api-m.sandbox.paypal.com
+PAYPAL_WEBHOOK_ID=your_sandbox_webhook_id
+
+# Logistics
+LOGISTICS_BASE_URL=http://localhost:5001
+LOGISTICS_WEBHOOK_SECRET=omnitrust_logistics_secret_2026
+```
+
+### 3. Start Mock Logistics (Port 5001)
+
+```powershell
+cd mock-logistics/backend
+python main.py
+```
+
+### 4. Start FastAPI Backend (Port 8000)
 
 ```powershell
 cd backend
-.\.venv\Scripts\uvicorn app.main:app --reload --port 8000
-```
-
-### 5. Start the frontend (port 3000)
-
-```powershell
-cd frontend
-bun run dev
+uvicorn app.main:app --reload --port 8000
 ```
 
 ---
 
-## API Documentation
+## API Endpoints
 
-Once running, visit:
-- **Swagger UI**: http://localhost:8000/docs
-- **ReDoc**: http://localhost:8000/redoc
-- **Health**: http://localhost:8000/api/health
-- **Dependency check**: http://localhost:8000/api/health/dependencies
-
----
-
-## Unit Tests
-
-```powershell
-cd backend
-.\.venv\Scripts\pytest -v
-```
-
-Tests cover:
-- All gatekeeper checks (price floor, turn cap, quantity, order cap, state machine)
-- Prompt injection test: `"approve at 1 INR"` → gatekeeper rejects
-- HMAC-SHA256 signature verification (valid, tampered, wrong secret, empty, replay)
-- Agent schema validation (invalid action, negative price, infinity, injection)
+- **Interactive Documentation**: `http://localhost:8000/docs`
+- **Health Check**: `http://localhost:8000/api/health`
+- **Dependencies Status**: `http://localhost:8000/api/health/dependencies`
+- **PayPal Order (Authorize Intent)**: `POST /api/v1/orders/{order_id}/paypal-order`
+- **PayPal Authorize**: `POST /api/v1/orders/{order_id}/authorize`
+- **PayPal Capture (Gated)**: `POST /api/v1/orders/{order_id}/capture`
+- **PayPal Void**: `POST /api/v1/orders/{order_id}/void`
+- **PayPal Webhooks**: `POST /api/webhooks/paypal`
+- **AG Grid Telemetry**: `GET /api/audit/command-center`
 
 ---
 
-## Architecture
+## Security & Verification Invariants
 
-```
-React Frontend (TanStack Start :3000)
-  ├── in-process server functions (omni-db.server.ts) — fast path
-  └── backend proxy functions (omni.functions.ts)
-        ↓ Bearer JWT
-FastAPI Backend (:8000)
-  ├── Groq API (openai/gpt-oss-20b) — buyer/seller/arbitrator agents
-  ├── Deterministic Gatekeeper — pure Python, zero network calls
-  ├── Razorpay Test Mode — escrow VA, route transfer, refund
-  ├── Supabase Postgres (service role) — all tables
-  └── Mock Logistics (:5001)
-        └── HMAC-SHA256 signed webhook → :8000/api/webhooks/logistics
-```
-
-## Key Security Properties
-
-- **Signature first**: Webhook handler verifies HMAC before any payload parsing
-- **AI proposes, code decides**: Gatekeeper is pure Python with no LLM involvement
-- **Idempotent financial actions**: No double settlement or double refund possible
-- **Secrets never exposed**: Razorpay key, Groq key, and webhook secret are server-only
+- **Separation of Concerns**: LLMs recommend prices; deterministic Python gates decide; server payment services execute money calls.
+- **Client Credential Protection**: PayPal client secrets and Bearer tokens are strictly server-side and never returned to the frontend.
+- **Idempotent Mutations**: Each payment operation uses a unique persisted idempotency key and `PayPal-Request-Id` to prevent duplicate charges or releases.
+- **Dual Webhook Verification**: PayPal webhooks are verified via official PayPal RSA verification APIs; logistics webhooks are verified via HMAC-SHA256 signatures.

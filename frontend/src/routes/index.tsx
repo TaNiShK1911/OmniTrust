@@ -99,7 +99,7 @@ function Landing() {
       <section className="grid-backdrop border-b border-border">
         <div className="mx-auto max-w-[1280px] px-4 py-20 md:px-6 md:py-28">
           <span className="label-mono inline-flex border border-terminal bg-terminal-soft px-2 py-1 text-terminal-foreground">
-            Razorpay test mode · glass-box console
+            PayPal Sandbox · conditional authorization & release
           </span>
           <h1 className="display-lg mt-6 max-w-4xl">
             AI agents that negotiate, transact, and settle{" "}
@@ -237,7 +237,7 @@ function Landing() {
                   </div>
                   <h4 className="mt-2 text-sm font-medium text-navy-foreground">Payment Subsystem</h4>
                   <p className="mt-1 text-xs text-navy-muted">
-                    Razorpay Test Mode with idempotent money actions and automatic releases.
+                    PayPal Orders v2 & Payments v2 with gated release and delivery proof.
                   </p>
                 </div>
 
@@ -323,7 +323,7 @@ function Landing() {
         <div className="mx-auto flex max-w-[1280px] flex-wrap items-center justify-between gap-4 px-4 py-8 md:px-6">
           <p className="label-mono text-navy-muted">OmniTrust · buildathon track: agentic commerce</p>
           <p className="mono-id text-navy-muted">
-            Running in Razorpay Test Mode — no real funds ever move.
+            Running in PayPal Sandbox — no real funds ever move.
           </p>
         </div>
       </footer>

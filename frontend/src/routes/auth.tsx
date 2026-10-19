@@ -272,7 +272,7 @@ Settlement            SELLER_PAID`}</pre>
                     onChange={(e) => setAccepted(e.target.checked)}
                     className="mt-1 size-4 accent-[oklch(0.577_0.235_267)]"
                   />
-                  Running in Razorpay Test Mode — no real funds ever move.
+                  Running in PayPal Sandbox — no real funds ever move.
                 </label>
               </>
             ) : null}

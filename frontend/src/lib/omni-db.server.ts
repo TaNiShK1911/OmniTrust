@@ -414,7 +414,7 @@ export async function createEscrow(db: DB, userId: string, orderId: string) {
     decision: "FUNDS_HELD",
     latencyMs: 210,
     payload: {
-      provider: "razorpay_test",
+      provider: "paypal_sandbox",
       provider_ref: ref,
       amount: Number(order.total_amount),
       currency: order.currency,
