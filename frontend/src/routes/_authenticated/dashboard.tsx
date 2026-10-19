@@ -5,7 +5,8 @@ import { useServerFn } from "@tanstack/react-start";
 import { ActionButton, AppShell } from "@/components/omni/AppShell";
 import { ApiState, LabelValue, Panel, StatusBadge } from "@/components/omni/ui";
 import { CATEGORY_LABEL, inr, shortId, timeOf } from "@/lib/omni";
-import { fetchDashboard, fetchDependencies } from "@/lib/omni.functions";
+import { fetchCommandCenterTelemetry, fetchDashboard, fetchDependencies } from "@/lib/omni.functions";
+import { AgentAuditGrid } from "@/components/audit/AgentAuditGrid";
 
 export const Route = createFileRoute("/_authenticated/dashboard")({
   head: () => ({
@@ -27,9 +28,11 @@ export const Route = createFileRoute("/_authenticated/dashboard")({
 function Dashboard() {
   const load = useServerFn(fetchDashboard);
   const deps = useServerFn(fetchDependencies);
+  const loadTelemetry = useServerFn(fetchCommandCenterTelemetry);
 
   const snapshot = useQuery({ queryKey: ["dashboard"], queryFn: () => load(), refetchInterval: 4000 });
   const dependencies = useQuery({ queryKey: ["dependencies"], queryFn: () => deps() });
+  const telemetry = useQuery({ queryKey: ["telemetry"], queryFn: () => loadTelemetry(), refetchInterval: 5000 });
 
   const orders = snapshot.data?.orders ?? [];
   const negotiations = snapshot.data?.negotiations ?? [];
@@ -101,7 +104,24 @@ function Dashboard() {
         </div>
       ) : null}
 
-      <div className="mt-6 grid gap-6 lg:grid-cols-3">
+      {/* AG Grid Agentic Audit Command Center */}
+      <div className="mt-8 space-y-3">
+        <div>
+          <h2 className="text-base font-semibold tracking-tight text-foreground">
+            Agentic Audit Command Center
+          </h2>
+          <p className="text-xs text-muted-foreground">
+            Operator-facing AG Grid with consensus scores, deterministic release gates, and PayPal authorization states.
+          </p>
+        </div>
+        <AgentAuditGrid
+          data={telemetry.data ?? []}
+          isLoading={telemetry.isLoading}
+          onRefresh={() => telemetry.refetch()}
+        />
+      </div>
+
+      <div className="mt-8 grid gap-6 lg:grid-cols-3">
         <Panel title="Recent orders" className="lg:col-span-2" dense>
           {orders.length === 0 ? (
             <p className="p-6 text-sm text-muted-foreground">
