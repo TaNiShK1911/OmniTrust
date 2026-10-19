@@ -9,7 +9,7 @@ import pytest
 from app.security.webhook_signatures import sign_payload, verify_signature
 
 
-SECRET = "razorpay_hackathon_secret_2026"
+SECRET = "omnitrust_logistics_secret_2026"
 BODY = b'{"tracking_id":"OMNI-TRK-1234","event":"delivered"}'
 
 
