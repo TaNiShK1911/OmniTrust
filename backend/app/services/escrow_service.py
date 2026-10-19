@@ -1,90 +1,44 @@
 """
 OmniTrust Backend — Escrow Service
 
-Creates and queries the Razorpay test-mode escrow state for an order.
-Idempotent: calling create_escrow twice on the same order returns the
-existing state without triggering a second Razorpay call.
+Creates and queries PayPal authorization state for an order.
+Integrates with payment_service for Orders v2 and Payments v2.
 """
+import asyncio
+import concurrent.futures
+from typing import Any
+
 from supabase import Client
 
-from app.db import queries
-from app.integrations.razorpay_client import payment_provider
-from app.services.audit_service import log_event
-from app.services.idempotency_service import check_already_done
+from app.services import payment_service
 
 
-def create_escrow(db: Client, *, order_id: str, user_id: str) -> dict:
-    """
-    Create Razorpay test-mode virtual account for the order.
-    Idempotent: returns existing escrow if already funded.
-    """
-    order = queries.get_order(db, order_id)
+def _run_async(coro):
+    try:
+        loop = asyncio.get_running_loop()
+    except RuntimeError:
+        return asyncio.run(coro)
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        return executor.submit(asyncio.run, coro).result()
 
-    if order["escrow_status"] == "held":
-        log_event(
-            db,
-            user_id=user_id,
-            order_id=order_id,
-            category="payment",
-            event_type="escrow.duplicate_suppressed",
-            actor="Escrow Service",
-            status="warning",
-            request_id=order.get("idempotency_key"),
-            decision="IDEMPOTENT_NO_OP",
-            payload={"escrow_ref": order.get("escrow_ref")},
-        )
-        return order
 
-    if order["status"] not in ("awaiting_escrow", "escrow_pending"):
-        raise ValueError(f"Order {order_id} is not in an escrowable state (status={order['status']})")
+async def create_payment_order_async(db: Client, *, order_id: str, user_id: str) -> dict[str, Any]:
+    return await payment_service.create_payment_order(db, order_id=order_id, user_id=user_id)
 
-    total = float(order["total_amount"])
-    currency = order.get("currency", "INR")
 
-    # Call Razorpay adapter
-    result = payment_provider.create_virtual_account(
-        db, user_id, order_id, total, currency
+async def authorize_payment_async(
+    db: Client, *, order_id: str, paypal_order_id: str, user_id: str
+) -> dict[str, Any]:
+    return await payment_service.authorize_payment(
+        db, order_id=order_id, paypal_order_id=paypal_order_id, user_id=user_id
     )
 
-    # Persist escrow reference on the order
-    updated = queries.update_order(
-        db,
-        order_id,
-        {
-            "escrow_status": "held",
-            "escrow_ref": result["provider_reference"],
-            "status": "escrow_held",
-        },
-    )
 
-    log_event(
-        db,
-        user_id=user_id,
-        order_id=order_id,
-        category="payment",
-        event_type="escrow.created",
-        actor="Payment Provider (test mode)",
-        entity=result["provider_reference"],
-        request_id=order.get("idempotency_key"),
-        decision="FUNDS_HELD",
-        latency_ms=200,
-        payload={
-            "provider": result.get("provider"),
-            "provider_ref": result["provider_reference"],
-            "amount": total,
-            "currency": currency,
-            "api_key": "redacted",
-        },
-    )
-    return updated
+def create_escrow(db: Client, *, order_id: str, user_id: str) -> dict[str, Any]:
+    """Sync compatibility wrapper for create_payment_order."""
+    return _run_async(create_payment_order_async(db, order_id=order_id, user_id=user_id))
 
 
-def get_escrow_status(db: Client, order_id: str) -> dict:
-    order = queries.get_order(db, order_id)
-    return {
-        "order_id": order_id,
-        "escrow_status": order["escrow_status"],
-        "escrow_ref": order.get("escrow_ref"),
-        "amount": order["total_amount"],
-        "currency": order.get("currency", "INR"),
-    }
+def get_escrow_status(db: Client, order_id: str) -> dict[str, Any]:
+    """Sync status lookup."""
+    return payment_service.get_payment_status(db, order_id=order_id)

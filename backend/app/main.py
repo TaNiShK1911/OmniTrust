@@ -11,7 +11,22 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
-from app.api import agents, audit, auth, catalog, disputes, escrow, health, metrics, negotiation, orders, products, shipments, webhooks
+from app.api import (
+    agents,
+    audit,
+    auth,
+    catalog,
+    disputes,
+    escrow,
+    health,
+    metrics,
+    negotiation,
+    orders,
+    paypal_webhooks,
+    products,
+    shipments,
+    webhooks,
+)
 from app.config import get_settings
 
 settings = get_settings()
@@ -20,7 +35,7 @@ settings = get_settings()
 def create_app() -> FastAPI:
     app = FastAPI(
         title="OmniTrust API",
-        description="AI-native B2B buyer/seller settlement backend — Razorpay Buildathon 2026",
+        description="Autonomous Agentic Commerce with PayPal Sandbox Escrow & Policy Guardrails",
         version="1.0.0",
         docs_url="/docs",
         redoc_url="/redoc",
@@ -110,6 +125,7 @@ def create_app() -> FastAPI:
     app.include_router(audit.router)
     app.include_router(catalog.router)
     app.include_router(webhooks.router)
+    app.include_router(paypal_webhooks.router)
 
     return app
 

@@ -13,7 +13,6 @@ from app.db.supabase import get_supabase_admin
 from app.db import queries
 from app.services import negotiation_service, escrow_service, shipment_service
 from app.services.gatekeeper import run_negotiation_checks, run_settlement_checks, run_refund_checks
-from app.integrations.razorpay_client import payment_provider
 
 
 def _create_test_auth_user(db, role="buyer"):
@@ -98,7 +97,7 @@ def test_end_to_end_delivery_lifecycle():
     order_id = order["id"]
     assert order["status"] == "escrow_pending"
     
-    # 6. Fund Escrow (Razorpay Test Mode abstraction)
+    # 6. Fund Escrow (PayPal Sandbox Orders v2)
     funded_order = escrow_service.create_escrow(db, order_id=order_id, user_id=test_user_id)
     assert funded_order["escrow_status"] == "held"
     assert funded_order["status"] == "escrow_held"

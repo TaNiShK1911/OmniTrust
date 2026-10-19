@@ -48,12 +48,12 @@ async def dependency_health():
         "detail": f"Model: {settings.groq_model}" if groq_ok else "GROQ_API_KEY missing — deterministic fallback active",
     })
 
-    # Razorpay
-    rz_ok = settings.razorpay_configured
+    # PayPal Sandbox
+    pp_ok = settings.paypal_configured
     checks.append({
-        "name": "razorpay",
-        "ok": rz_ok,
-        "detail": "Test mode credentials present" if rz_ok else "Credentials missing — simulation mode",
+        "name": "paypal_sandbox",
+        "ok": pp_ok,
+        "detail": f"Base URL: {settings.paypal_base_url}" if pp_ok else "PAYPAL_CLIENT_ID / PAYPAL_CLIENT_SECRET missing",
     })
 
     # Mock Logistics

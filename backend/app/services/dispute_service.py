@@ -6,10 +6,15 @@ Handles the full damaged-goods dispute lifecycle:
 """
 from supabase import Client
 
+import asyncio
+import concurrent.futures
+from decimal import Decimal
+
 from app.agents.arbitrator_agent import arbitrate
 from app.config import get_settings
 from app.db import queries
-from app.integrations.razorpay_client import payment_provider
+from app.schemas.payments import PaymentState
+from app.services import payment_service
 from app.services.audit_service import log_event
 from app.services.gatekeeper import run_refund_checks
 from app.services.idempotency_service import provider_ref
@@ -119,9 +124,18 @@ def run_arbitration(db: Client, *, dispute_id: str, user_id: str) -> dict:
     return updated
 
 
-def execute_refund(db: Client, *, dispute_id: str, user_id: str) -> dict:
+def _run_async(coro):
+    try:
+        loop = asyncio.get_running_loop()
+    except RuntimeError:
+        return asyncio.run(coro)
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        return executor.submit(asyncio.run, coro).result()
+
+
+async def execute_refund_async(db: Client, *, dispute_id: str, user_id: str) -> dict:
     """
-    Execute the bounded refund through Razorpay after policy validation.
+    Execute the bounded refund/void through PayPal after policy validation.
     The refund gate is the final authority — the agent recommendation alone
     is not sufficient to trigger a financial action.
     """
@@ -152,44 +166,34 @@ def execute_refund(db: Client, *, dispute_id: str, user_id: str) -> dict:
         )
         return {"ok": False, "checks": gate.to_dict()["checks"], "dispute": dispute}
 
-    # Execute Razorpay refund
-    result = payment_provider.create_refund(
-        db,
-        user_id,
-        order["id"],
-        refund_amount,
-        notes={"dispute_id": dispute_id, "order_id": order["id"]},
-    )
+    payment_status = payment_service.get_payment_status(db, order_id=order["id"])
+    state = payment_status.get("state")
 
-    queries.update_order(
-        db,
-        order["id"],
-        {
-            "status": "refunded",
-            "escrow_status": "refunded",
-            "refund_ref": result["provider_reference"],
-            "refund_amount": refund_amount,
-        },
-    )
+    if state == PaymentState.CAPTURED_AND_SETTLED.value:
+        res = await payment_service.refund_order(
+            db,
+            order_id=order["id"],
+            user_id=user_id,
+            refund_amount=Decimal(str(refund_amount)),
+            note=f"Dispute {dispute_id} resolved with refund",
+        )
+        provider_ref = res.get("refund_id")
+    else:
+        res = await payment_service.void_order(
+            db,
+            order_id=order["id"],
+            user_id=user_id,
+        )
+        provider_ref = res.get("authorization_id")
+
     updated = queries.update_dispute(
         db,
         dispute_id,
-        {"status": "resolved", "refund_ref": result["provider_reference"]},
-    )
-
-    log_event(
-        db,
-        user_id=user_id,
-        order_id=order["id"],
-        category="refund",
-        event_type="refund.completed",
-        actor="Payment Provider (test mode)",
-        entity=result["provider_reference"],
-        decision="REFUND_EXECUTED",
-        payload={
-            "checks": gate.to_dict()["checks"],
-            "provider_ref": result["provider_reference"],
-            "refund_amount": refund_amount,
-        },
+        {"status": "resolved", "refund_ref": provider_ref},
     )
     return {"ok": True, "checks": gate.to_dict()["checks"], "dispute": updated}
+
+
+def execute_refund(db: Client, *, dispute_id: str, user_id: str) -> dict:
+    """Sync wrapper for execute_refund_async."""
+    return _run_async(execute_refund_async(db, dispute_id=dispute_id, user_id=user_id))
