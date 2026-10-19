@@ -6,6 +6,8 @@ import { AppShell } from "@/components/omni/AppShell";
 import { ApiState, LabelValue, Panel, StatusBadge } from "@/components/omni/ui";
 import { shortId } from "@/lib/omni";
 import { fetchOrders } from "@/lib/omni.functions";
+import { EscrowLifecycleTimeline } from "@/components/timeline/EscrowLifecycleTimeline";
+import { LifecycleMilestone } from "@/lib/timeline.types";
 
 export const Route = createFileRoute("/_authenticated/logistics")({
   head: () => ({
@@ -85,6 +87,73 @@ function Logistics() {
             </ul>
           )}
         </Panel>
+
+        {shipments.length > 0 && (
+          <Panel title="Bryntum Escrow & Logistics Milestone Timeline">
+            <EscrowLifecycleTimeline
+              milestones={[
+                {
+                  id: "m-1",
+                  type: "negotiation_agreed",
+                  title: "Consensus Agreed by AI Agents",
+                  actor: "Autonomous Buyer & Seller",
+                  timestamp: shipments[0].order.created_at,
+                  status: "completed",
+                  details: {
+                    product: shipments[0].order.product_name,
+                    quantity: shipments[0].order.quantity,
+                    total: `${shipments[0].order.total_amount} ${shipments[0].order.currency}`,
+                  },
+                },
+                {
+                  id: "m-2",
+                  type: "paypal_authorization_confirmed",
+                  title: "PayPal Conditional Authorization Confirmed",
+                  actor: "PayPal Sandbox Payments v2",
+                  timestamp: shipments[0].order.updated_at,
+                  status: shipments[0].order.escrow_status === "held" ? "completed" : "pending",
+                  reference_id: shipments[0].order.escrow_ref || undefined,
+                },
+                {
+                  id: "m-3",
+                  type: "carrier_pickup",
+                  title: "Carrier Registered & Waypoint Dispatched",
+                  actor: "OmniTrust Mock 3PL",
+                  timestamp: shipments[0].shipment.created_at || shipments[0].order.updated_at,
+                  status: "completed",
+                  reference_id: shipments[0].shipment.tracking_id,
+                },
+                {
+                  id: "m-4",
+                  type: "delivery_verified",
+                  title:
+                    shipments[0].shipment.status === "delivered"
+                      ? "Cryptographic Delivery Proof Verified"
+                      : "In-Transit to Destination",
+                  actor: "Mock Logistics Carrier",
+                  timestamp: shipments[0].order.updated_at,
+                  status: shipments[0].shipment.status === "delivered" ? "completed" : "in_progress",
+                  proof_hash:
+                    shipments[0].shipment.status === "delivered"
+                      ? `sha256:${shipments[0].shipment.tracking_id.slice(-8)}...verified`
+                      : undefined,
+                },
+                {
+                  id: "m-5",
+                  type: "paypal_capture_completed",
+                  title:
+                    shipments[0].order.status === "settled"
+                      ? "PayPal Settlement Released to Seller"
+                      : "Deterministic Settlement Gate Pending",
+                  actor: "OmniTrust Gatekeeper & PayPal",
+                  timestamp: shipments[0].order.updated_at,
+                  status: shipments[0].order.status === "settled" ? "completed" : "pending",
+                  reference_id: shipments[0].order.settlement_ref || undefined,
+                },
+              ]}
+            />
+          </Panel>
+        )}
       </div>
     </AppShell>
   );
