@@ -5,7 +5,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { ActionButton, AppShell } from "@/components/omni/AppShell";
 import { ApiState, GateChecks, MoneyCard, Panel, StatusBadge } from "@/components/omni/ui";
 import { inr, shortId } from "@/lib/omni";
-import { fetchOrder, settleOrder } from "@/lib/omni.functions";
+import { fetchOrder, fetchPaymentStatus, settleOrder } from "@/lib/omni.functions";
 
 export const Route = createFileRoute("/_authenticated/orders/$orderId/settlement")({
   head: () => ({
@@ -27,6 +27,7 @@ export const Route = createFileRoute("/_authenticated/orders/$orderId/settlement
 function Settlement() {
   const { orderId } = Route.useParams();
   const load = useServerFn(fetchOrder);
+  const loadPayment = useServerFn(fetchPaymentStatus);
   const settle = useServerFn(settleOrder);
 
   const order = useQuery({
@@ -34,12 +35,22 @@ function Settlement() {
     queryFn: () => load({ data: { id: orderId } }),
   });
 
+  const payment = useQuery({
+    queryKey: ["paymentStatus", orderId],
+    queryFn: () => loadPayment({ data: { orderId } }),
+    refetchInterval: 5000,
+  });
+
   const release = useMutation({
     mutationFn: () => settle({ data: { orderId } }),
-    onSuccess: () => order.refetch(),
+    onSuccess: () => {
+      order.refetch();
+      payment.refetch();
+    },
   });
 
   const o = order.data;
+  const pay = payment.data;
   const shipment = (o?.shipments as { status: string }[] | undefined)?.[0];
   const dispute = (o?.disputes as { id: string; status: string }[] | undefined)?.[0];
   const checks = release.data?.checks ?? [];
@@ -65,7 +76,12 @@ function Settlement() {
         <div className="grid gap-6 lg:grid-cols-3">
           <div className="space-y-6 lg:col-span-2">
             <div className="grid gap-px bg-border sm:grid-cols-3">
-              <MoneyCard label="Held in escrow" amount={inr(o.total_amount)} reference={o.escrow_ref} tone="active" />
+              <MoneyCard
+                label={`Escrow (${pay?.state || (o.escrow_status === "held" ? "FUNDS_AUTHORIZED" : "PENDING")})`}
+                amount={inr(o.total_amount)}
+                reference={pay?.authorization_id ? `Auth: ${shortId(pay.authorization_id)}` : o.escrow_ref}
+                tone={pay?.state === "FUNDS_AUTHORIZED" || o.escrow_status === "held" ? "active" : "pending"}
+              />
               <MoneyCard
                 label="Delivery status"
                 amount={shipment?.status ?? "no shipment"}
@@ -73,10 +89,10 @@ function Settlement() {
                 tone={shipment?.status === "delivered" ? "success" : "pending"}
               />
               <MoneyCard
-                label="Settlement reference"
-                amount={o.settlement_ref ? "released" : "pending"}
-                reference={o.settlement_ref}
-                tone={o.settlement_ref ? "success" : "neutral"}
+                label="PayPal Settlement"
+                amount={pay?.capture_id || o.settlement_ref ? "CAPTURED" : "PENDING"}
+                reference={pay?.capture_id ? `Cap: ${shortId(pay.capture_id)}` : o.settlement_ref}
+                tone={pay?.capture_id || o.settlement_ref ? "success" : "neutral"}
               />
             </div>
 

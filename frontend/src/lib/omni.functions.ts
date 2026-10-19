@@ -111,6 +111,40 @@ export type Order = {
   ok?: boolean;
 };
 
+export type PaymentStatus = {
+  order_id: string;
+  transaction_id?: string | null;
+  provider: string;
+  state: string;
+  paypal_order_id?: string | null;
+  authorization_id?: string | null;
+  capture_id?: string | null;
+  last_refund_id?: string | null;
+  amount: string;
+  currency: string;
+  authorization_expires_at?: string | null;
+  escrow_status: string;
+  order_status: string;
+};
+
+export type CreatePayPalOrderResult = {
+  order_id: string;
+  paypal_order_id: string;
+  approval_url: string;
+  state: string;
+  amount: string;
+  currency: string;
+};
+
+export type AuthorizePayPalOrderResult = {
+  ok: boolean;
+  order_id: string;
+  authorization_id?: string;
+  state: string;
+  expiration_time?: string;
+  message?: string;
+};
+
 
 const BACKEND_URL = process.env["BACKEND_URL"] ?? "http://localhost:8000";
 
@@ -254,6 +288,43 @@ export const createEscrow = createServerFn({ method: "POST" })
     return backendFetch<Order>("POST", `/api/v1/orders/${data.orderId}/escrow`, getToken());
   });
 
+export const createPayPalOrder = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { orderId: string }) => input)
+  .handler(async ({ data }) => {
+    return backendFetch<CreatePayPalOrderResult>("POST", `/api/v1/orders/${data.orderId}/paypal-order`, getToken());
+  });
+
+export const authorizePayPalOrder = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { orderId: string; paypalOrderId: string }) => input)
+  .handler(async ({ data }) => {
+    return backendFetch<AuthorizePayPalOrderResult>("POST", `/api/v1/orders/${data.orderId}/authorize`, getToken(), {
+      paypal_order_id: data.paypalOrderId,
+    });
+  });
+
+export const fetchPaymentStatus = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { orderId: string }) => input)
+  .handler(async ({ data }) => {
+    return backendFetch<PaymentStatus>("GET", `/api/v1/orders/${data.orderId}/payment`, getToken());
+  });
+
+export const capturePayPalOrder = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { orderId: string }) => input)
+  .handler(async ({ data }) => {
+    return backendFetch<Order>("POST", `/api/v1/orders/${data.orderId}/capture`, getToken());
+  });
+
+export const voidPayPalOrder = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { orderId: string }) => input)
+  .handler(async ({ data }) => {
+    return backendFetch<Order>("POST", `/api/v1/orders/${data.orderId}/void`, getToken());
+  });
+
 export const registerShipment = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { orderId: string }) => input)
@@ -343,3 +414,9 @@ export const fetchBackendHealth = createServerFn({ method: "GET" })
   });
 
 export const fetchAuditViaBackend = fetchAudit;
+
+export const fetchCommandCenterTelemetry = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async () => {
+    return backendFetch<any[]>("GET", "/api/audit/command-center", getToken());
+  });

@@ -6,6 +6,7 @@ import { ActionButton, AppShell } from "@/components/omni/AppShell";
 import { ApiState, LabelValue, MoneyCard, Panel, StatusBadge, Timeline } from "@/components/omni/ui";
 import { inr, shortId, timeOf } from "@/lib/omni";
 import { createEscrow, fetchOrder, registerShipment } from "@/lib/omni.functions";
+import { PayPalCheckout } from "@/components/payment/PayPalCheckout";
 
 export const Route = createFileRoute("/_authenticated/orders/$orderId/")({
   head: () => ({
@@ -193,17 +194,21 @@ function OrderDetail() {
             </Panel>
 
             <Panel title="Actions">
-              <div className="space-y-3">
+              <div className="space-y-4">
                 {holdFunds.isError ? <ApiState error={holdFunds.error} /> : null}
                 {registerParcel.isError ? <ApiState error={registerParcel.error} /> : null}
 
-                <ActionButton
-                  onClick={() => holdFunds.mutate()}
-                  disabled={holdFunds.isPending || o.escrow_status !== "none"}
-                  className="w-full"
-                >
-                  {holdFunds.isPending ? "Holding funds…" : "Hold funds in escrow"}
-                </ActionButton>
+                {o.escrow_status !== "held" && o.status !== "settled" && o.status !== "refunded" ? (
+                  <div className="mb-2">
+                    <PayPalCheckout
+                      orderId={orderId}
+                      amount={Number(o.total_amount)}
+                      currency={o.currency || "USD"}
+                      onSuccess={() => order.refetch()}
+                    />
+                  </div>
+                ) : null}
+
                 <ActionButton
                   variant="outline"
                   onClick={() => registerParcel.mutate()}
