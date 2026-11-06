@@ -34,13 +34,19 @@ def create_negotiation(body: StartNegotiationBody, db: DB, user: AuthUser):
 
 @router.get("/{session_id}")
 def get_negotiation(session_id: str, db: DB, user: AuthUser):
-    neg = queries.get_negotiation(db, session_id)
+    try:
+        neg = queries.get_negotiation_for_user(db, session_id, user.user_id)
+    except PermissionError as exc:
+        raise HTTPException(status_code=403, detail={"code": "FORBIDDEN", "message": str(exc)})
     return {"success": True, "data": neg, "error": None}
 
 
 @router.get("/{session_id}/turns")
 def get_turns(session_id: str, db: DB, user: AuthUser):
-    neg = queries.get_negotiation(db, session_id)
+    try:
+        neg = queries.get_negotiation_for_user(db, session_id, user.user_id)
+    except PermissionError as exc:
+        raise HTTPException(status_code=403, detail={"code": "FORBIDDEN", "message": str(exc)})
     turns = neg.get("turns") or []
     return {"success": True, "data": {"session_id": session_id, "turns": turns}, "error": None}
 
@@ -56,6 +62,8 @@ def next_turn(session_id: str, db: DB, user: AuthUser):
             spending_cap=getattr(user, "spending_cap", None),
         )
         return {"success": True, "data": result, "error": None}
+    except PermissionError as exc:
+        raise HTTPException(status_code=403, detail={"code": "FORBIDDEN", "message": str(exc)})
     except ValueError as exc:
         code = "NEGOTIATION_LIMIT_REACHED" if "budget" in str(exc) else "NEGOTIATION_ERROR"
         raise HTTPException(
@@ -75,6 +83,8 @@ def approve_negotiation(session_id: str, db: DB, user: AuthUser):
             spending_cap=getattr(user, "spending_cap", None),
         )
         return {"success": True, "data": result, "error": None}
+    except PermissionError as exc:
+        raise HTTPException(status_code=403, detail={"code": "FORBIDDEN", "message": str(exc)})
     except ValueError as exc:
         raise HTTPException(status_code=422, detail={"code": "APPROVAL_ERROR", "message": str(exc)})
 
@@ -86,5 +96,7 @@ def cancel_negotiation(session_id: str, db: DB, user: AuthUser):
             db, session_id=session_id, user_id=user.user_id
         )
         return {"success": True, "data": result, "error": None}
+    except PermissionError as exc:
+        raise HTTPException(status_code=403, detail={"code": "FORBIDDEN", "message": str(exc)})
     except ValueError as exc:
         raise HTTPException(status_code=422, detail={"code": "CANCEL_ERROR", "message": str(exc)})

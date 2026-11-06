@@ -28,10 +28,14 @@ from app.services.idempotency_service import provider_ref
 logger = logging.getLogger("omnitrust.payment_service")
 
 
-def get_payment_status(db: Client, *, order_id: str) -> dict[str, Any]:
+def get_payment_status(db: Client, *, order_id: str, user_id: str | None = None) -> dict[str, Any]:
     """Retrieve canonical payment status and references for an order."""
     tx = payment_queries.get_payment_transaction_by_order_id(db, order_id)
-    order = queries.get_order(db, order_id)
+    order = (
+        queries.get_order_for_user(db, order_id, user_id)
+        if user_id is not None
+        else queries.get_order(db, order_id)
+    )
 
     if tx:
         return {
@@ -80,9 +84,7 @@ async def create_payment_order(
     Buyer has not approved yet. Persists state=PENDING_APPROVAL.
     Idempotent: returns existing approval details if already created.
     """
-    order = queries.get_order(db, order_id)
-    if order["user_id"] != user_id:
-        raise PermissionError(f"User {user_id} does not own order {order_id}")
+    order = queries.get_order_for_user(db, order_id, user_id)
 
     # Check for existing transaction
     existing_tx = payment_queries.get_payment_transaction_by_order_id(db, order_id)
@@ -188,9 +190,7 @@ async def authorize_payment(
     Step 2: Authorize payment after buyer approval.
     Validates that paypal_order_id belongs to order_id and persists state=FUNDS_AUTHORIZED.
     """
-    order = queries.get_order(db, order_id)
-    if order["user_id"] != user_id:
-        raise PermissionError(f"User {user_id} does not own order {order_id}")
+    order = queries.get_order_for_user(db, order_id, user_id)
 
     tx = payment_queries.get_payment_transaction_by_order_id(db, order_id)
     if tx and tx.get("paypal_order_id") and tx.get("paypal_order_id") != paypal_order_id:
@@ -331,7 +331,7 @@ async def capture_order(
     Step 3: Capture authorized funds after settlement gatekeeper passes.
     Deterministic gate verified FIRST: delivery must be verified, no open disputes.
     """
-    order = queries.get_order(db, order_id)
+    order = queries.get_order_for_user(db, order_id, user_id)
     shipments = order.get("shipments") or []
     disputes = order.get("disputes") or []
 
@@ -467,7 +467,7 @@ async def void_order(
     """
     Void an uncaptured authorization (all-or-nothing).
     """
-    order = queries.get_order(db, order_id)
+    order = queries.get_order_for_user(db, order_id, user_id)
     tx = payment_queries.get_payment_transaction_by_order_id(db, order_id)
 
     auth_id = (tx.get("authorization_id") if tx else None) or order.get("escrow_ref")
@@ -548,7 +548,7 @@ async def refund_order(
     Refund a captured payment using the capture ID.
     Supports full or partial refund.
     """
-    order = queries.get_order(db, order_id)
+    order = queries.get_order_for_user(db, order_id, user_id)
     tx = payment_queries.get_payment_transaction_by_order_id(db, order_id)
 
     capture_id = (tx.get("capture_id") if tx else None) or order.get("settlement_ref")

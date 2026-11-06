@@ -204,12 +204,7 @@ function getToken(): string {
   if (authHeader && authHeader.trim() !== "Bearer" && authHeader.trim() !== "") {
     return authHeader.replace(/^Bearer\s+/i, "").trim();
   }
-  return (
-    process.env["SUPABASE_SERVICE_ROLE_KEY"] ||
-    process.env["SUPABASE_ANON_KEY"] ||
-    process.env["VITE_SUPABASE_ANON_KEY"] ||
-    ""
-  );
+  throw new Error("Unauthorized: Bearer token required");
 }
 
 export const getMyProfile = createServerFn({ method: "GET" })

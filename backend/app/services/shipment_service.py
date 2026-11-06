@@ -23,7 +23,7 @@ def register_shipment(db: Client, *, order_id: str, user_id: str) -> dict:
     Requires order.escrow_status == 'held'.
     Idempotent: returns existing shipment if already registered.
     """
-    order = queries.get_order(db, order_id)
+    order = queries.get_order_for_user(db, order_id, user_id)
 
     if order["escrow_status"] != "held":
         raise ValueError("Escrow must be held before creating a shipment")

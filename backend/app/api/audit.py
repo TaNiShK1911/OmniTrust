@@ -32,7 +32,11 @@ def list_audit_logs(
 
 @router.get("/logs/{event_id}")
 def get_audit_log(event_id: str, db: DB, user: AuthUser):
-    event = queries.get_audit_event(db, event_id)
+    try:
+        event = queries.get_audit_event_for_user(db, event_id, user.user_id)
+    except PermissionError as exc:
+        from fastapi import HTTPException
+        raise HTTPException(status_code=403, detail={"code": "FORBIDDEN", "message": str(exc)})
     return {"success": True, "data": event, "error": None}
 
 

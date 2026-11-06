@@ -15,6 +15,8 @@ def create_shipment(order_id: str, db: DB, user: AuthUser):
             db, order_id=order_id, user_id=user.user_id
         )
         return {"success": True, "data": shipment, "error": None}
+    except PermissionError as exc:
+        raise HTTPException(status_code=403, detail={"code": "FORBIDDEN", "message": str(exc)})
     except ValueError as exc:
         raise HTTPException(status_code=422, detail={"code": "SHIPMENT_ERROR", "message": str(exc)})
     except Exception as exc:
@@ -32,7 +34,10 @@ def list_shipments(db: DB, user: AuthUser):
 
 @router.get("/api/v1/shipments/{tracking_id}")
 def get_shipment(tracking_id: str, db: DB, user: AuthUser):
-    shipment = queries.get_shipment_by_tracking(db, tracking_id)
+    try:
+        shipment = queries.get_shipment_for_user(db, tracking_id, user.user_id)
+    except PermissionError as exc:
+        raise HTTPException(status_code=403, detail={"code": "FORBIDDEN", "message": str(exc)})
     if not shipment:
         raise HTTPException(
             status_code=404,

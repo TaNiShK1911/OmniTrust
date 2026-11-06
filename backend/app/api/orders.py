@@ -19,8 +19,10 @@ def create_from_negotiation(session_id: str, db: DB, user: AuthUser):
             is_external_agent=(user.role == "agent-buyer"),
             spending_cap=getattr(user, "spending_cap", None),
         )
-        order = queries.get_order(db, result["order_id"])
+        order = queries.get_order_for_user(db, result["order_id"], user.user_id)
         return {"success": True, "data": order, "error": None}
+    except PermissionError as exc:
+        raise HTTPException(status_code=403, detail={"code": "FORBIDDEN", "message": str(exc)})
     except ValueError as exc:
         raise HTTPException(status_code=422, detail={"code": "ORDER_CREATE_ERROR", "message": str(exc)})
 
@@ -39,13 +41,19 @@ def list_orders(
 
 @router.get("/{order_id}")
 def get_order(order_id: str, db: DB, user: AuthUser):
-    order = queries.get_order(db, order_id)
+    try:
+        order = queries.get_order_for_user(db, order_id, user.user_id)
+    except PermissionError as exc:
+        raise HTTPException(status_code=403, detail={"code": "FORBIDDEN", "message": str(exc)})
     return {"success": True, "data": order, "error": None}
 
 
 @router.post("/{order_id}/cancel")
 def cancel_order(order_id: str, db: DB, user: AuthUser):
-    order = queries.get_order(db, order_id)
+    try:
+        order = queries.get_order_for_user(db, order_id, user.user_id)
+    except PermissionError as exc:
+        raise HTTPException(status_code=403, detail={"code": "FORBIDDEN", "message": str(exc)})
     non_cancellable = {"escrow_held", "in_transit", "delivered", "settled", "refunded"}
     if order["status"] in non_cancellable:
         raise HTTPException(
@@ -70,7 +78,10 @@ def cancel_order(order_id: str, db: DB, user: AuthUser):
 def get_timeline(order_id: str, db: DB, user: AuthUser):
     """Frontend-optimised chronological audit trail for one order."""
     events = queries.list_audit_events(db, order_id=order_id)
-    order = queries.get_order(db, order_id)
+    try:
+        order = queries.get_order_for_user(db, order_id, user.user_id)
+    except PermissionError as exc:
+        raise HTTPException(status_code=403, detail={"code": "FORBIDDEN", "message": str(exc)})
     return {
         "success": True,
         "data": {"order": order, "timeline": events},

@@ -107,7 +107,7 @@ def run_next_turn(
       5. Return updated negotiation
     """
     settings = get_settings()
-    neg = queries.get_negotiation(db, session_id)
+    neg = queries.get_negotiation_for_user(db, session_id, user_id)
     product = neg["product"]
 
     if neg["status"] != "active":
@@ -428,7 +428,7 @@ def approve_session(
     spending_cap: float | None = None,
 ) -> dict:
     """Human confirmation: convert agreed negotiation into an order."""
-    neg = queries.get_negotiation(db, session_id)
+    neg = queries.get_negotiation_for_user(db, session_id, user_id)
     if neg["status"] != "agreed" or not neg.get("agreed_unit_price"):
         raise ValueError("Negotiation has not reached consensus")
 
@@ -482,7 +482,7 @@ def approve_session(
 
 
 def cancel_session(db: Client, *, session_id: str, user_id: str) -> dict:
-    neg = queries.get_negotiation(db, session_id)
+    neg = queries.get_negotiation_for_user(db, session_id, user_id)
     if neg["status"] in ("approved", "agreed"):
         raise ValueError("Cannot cancel a session that has already been approved")
     queries.update_negotiation(db, session_id, {"status": "cancelled"})

@@ -30,7 +30,7 @@ def create_dispute(
     reason: str = "DAMAGED_GOODS",
 ) -> dict:
     """Create an open dispute for a damaged shipment."""
-    order = queries.get_order(db, order_id)
+    order = queries.get_order_for_user(db, order_id, user_id)
 
     # Check no existing open dispute
     existing = queries.list_disputes_for_order(db, order_id)
@@ -69,7 +69,7 @@ def run_arbitration(db: Client, *, dispute_id: str, user_id: str) -> dict:
     Run the Arbitrator Agent and persist the recommendation.
     The agent cannot execute a refund — that requires calling execute_refund.
     """
-    dispute = queries.get_dispute(db, dispute_id)
+    dispute = queries.get_dispute_for_user(db, dispute_id, user_id)
     order = dispute["orders"]
 
     if dispute["status"] not in ("open", "arbitrating"):
@@ -139,7 +139,7 @@ async def execute_refund_async(db: Client, *, dispute_id: str, user_id: str) -> 
     The refund gate is the final authority — the agent recommendation alone
     is not sufficient to trigger a financial action.
     """
-    dispute = queries.get_dispute(db, dispute_id)
+    dispute = queries.get_dispute_for_user(db, dispute_id, user_id)
     order = dispute["orders"]
     refund_amount = float(dispute.get("refund_amount") or 0)
     total_paid = float(order["total_amount"])

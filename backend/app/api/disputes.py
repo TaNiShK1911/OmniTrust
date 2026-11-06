@@ -12,7 +12,10 @@ router = APIRouter(tags=["disputes"])
 
 @router.post("/api/v1/orders/{order_id}/settle")
 def settle_order(order_id: str, db: DB, user: AuthUser):
-    result = settlement_service.settle_order(db, order_id=order_id, user_id=user.user_id)
+    try:
+        result = settlement_service.settle_order(db, order_id=order_id, user_id=user.user_id)
+    except PermissionError as exc:
+        raise HTTPException(status_code=403, detail={"code": "FORBIDDEN", "message": str(exc)})
     if not result["ok"]:
         raise HTTPException(
             status_code=422,
@@ -23,7 +26,10 @@ def settle_order(order_id: str, db: DB, user: AuthUser):
 
 @router.get("/api/v1/orders/{order_id}/settlement")
 def get_settlement(order_id: str, db: DB, user: AuthUser):
-    order = queries.get_order(db, order_id)
+    try:
+        order = queries.get_order_for_user(db, order_id, user.user_id)
+    except PermissionError as exc:
+        raise HTTPException(status_code=403, detail={"code": "FORBIDDEN", "message": str(exc)})
     return {
         "success": True,
         "data": {
@@ -40,13 +46,19 @@ def get_settlement(order_id: str, db: DB, user: AuthUser):
 
 @router.post("/api/v1/orders/{order_id}/disputes", status_code=201)
 def create_dispute(order_id: str, db: DB, user: AuthUser):
-    dispute = dispute_service.create_dispute(db, order_id=order_id, user_id=user.user_id)
+    try:
+        dispute = dispute_service.create_dispute(db, order_id=order_id, user_id=user.user_id)
+    except PermissionError as exc:
+        raise HTTPException(status_code=403, detail={"code": "FORBIDDEN", "message": str(exc)})
     return {"success": True, "data": dispute, "error": None}
 
 
 @router.get("/api/v1/disputes/{dispute_id}")
 def get_dispute(dispute_id: str, db: DB, user: AuthUser):
-    dispute = queries.get_dispute(db, dispute_id)
+    try:
+        dispute = queries.get_dispute_for_user(db, dispute_id, user.user_id)
+    except PermissionError as exc:
+        raise HTTPException(status_code=403, detail={"code": "FORBIDDEN", "message": str(exc)})
     return {"success": True, "data": dispute, "error": None}
 
 
@@ -55,13 +67,18 @@ def arbitrate(dispute_id: str, db: DB, user: AuthUser):
     try:
         result = dispute_service.run_arbitration(db, dispute_id=dispute_id, user_id=user.user_id)
         return {"success": True, "data": result, "error": None}
+    except PermissionError as exc:
+        raise HTTPException(status_code=403, detail={"code": "FORBIDDEN", "message": str(exc)})
     except ValueError as exc:
         raise HTTPException(status_code=422, detail={"code": "ARBITRATION_ERROR", "message": str(exc)})
 
 
 @router.post("/api/v1/disputes/{dispute_id}/refund")
 def execute_refund(dispute_id: str, db: DB, user: AuthUser):
-    result = dispute_service.execute_refund(db, dispute_id=dispute_id, user_id=user.user_id)
+    try:
+        result = dispute_service.execute_refund(db, dispute_id=dispute_id, user_id=user.user_id)
+    except PermissionError as exc:
+        raise HTTPException(status_code=403, detail={"code": "FORBIDDEN", "message": str(exc)})
     if not result["ok"]:
         raise HTTPException(
             status_code=422,
@@ -72,6 +89,10 @@ def execute_refund(dispute_id: str, db: DB, user: AuthUser):
 
 @router.get("/api/v1/orders/{order_id}/refunds")
 def get_refunds(order_id: str, db: DB, user: AuthUser):
+    try:
+        queries.get_order_for_user(db, order_id, user.user_id)
+    except PermissionError as exc:
+        raise HTTPException(status_code=403, detail={"code": "FORBIDDEN", "message": str(exc)})
     disputes = queries.list_disputes_for_order(db, order_id)
     refunds = [d for d in disputes if d.get("refund_ref")]
     return {"success": True, "data": refunds, "error": None}

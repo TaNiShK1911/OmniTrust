@@ -44,28 +44,15 @@ def get_current_user(
 ) -> CurrentUser:
     """
     Extract and validate the Supabase Bearer token from the Authorization header.
-    Raises 401 on any verification failure in production, fallbacks cleanly in development.
+    Raises 401 on any missing or invalid bearer token in every environment.
     """
-    settings = get_settings()
     if not authorization or not authorization.lower().startswith("bearer "):
-        if settings.is_development:
-            return CurrentUser(
-                user_id="be72b3ca-7ab2-4c6d-bc13-ebdcd6a216d4",
-                email="demo@omnitrust.local",
-                role="authenticated",
-            )
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail={"code": "MISSING_TOKEN", "message": "Authorization header required"},
         )
     token = authorization.split(" ", 1)[1].strip()
     if not token:
-        if settings.is_development:
-            return CurrentUser(
-                user_id="be72b3ca-7ab2-4c6d-bc13-ebdcd6a216d4",
-                email="demo@omnitrust.local",
-                role="authenticated",
-            )
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail={"code": "MISSING_TOKEN", "message": "Token required"},
@@ -73,12 +60,6 @@ def get_current_user(
     try:
         payload = verify_supabase_jwt(token)
     except ValueError as exc:
-        if settings.is_development:
-            return CurrentUser(
-                user_id="be72b3ca-7ab2-4c6d-bc13-ebdcd6a216d4",
-                email="demo@omnitrust.local",
-                role="authenticated",
-            )
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail={"code": "INVALID_TOKEN", "message": str(exc)},

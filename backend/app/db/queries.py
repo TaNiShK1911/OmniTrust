@@ -102,6 +102,13 @@ def get_negotiation(db: Client, session_id: str) -> dict:
     raise RuntimeError(f"Negotiation {session_id} not found")
 
 
+def get_negotiation_for_user(db: Client, session_id: str, user_id: str) -> dict:
+    negotiation = get_negotiation(db, session_id)
+    if str(negotiation.get("user_id")) != str(user_id):
+        raise PermissionError("Negotiation does not belong to the authenticated user")
+    return negotiation
+
+
 def update_negotiation(db: Client, session_id: str, fields: dict) -> dict:
     res = db.table("negotiations").update(fields).eq("id", session_id).execute()
     if res and res.data and len(res.data) > 0:
@@ -141,6 +148,13 @@ def get_order(db: Client, order_id: str) -> dict:
     if res and res.data and len(res.data) > 0:
         return res.data[0]
     raise RuntimeError(f"Order {order_id} not found")
+
+
+def get_order_for_user(db: Client, order_id: str, user_id: str) -> dict:
+    order = get_order(db, order_id)
+    if str(order.get("user_id")) != str(user_id):
+        raise PermissionError("Order does not belong to the authenticated user")
+    return order
 
 
 def update_order(db: Client, order_id: str, fields: dict) -> dict:
@@ -202,6 +216,13 @@ def get_shipment_by_tracking(db: Client, tracking_id: str) -> dict | None:
     return None
 
 
+def get_shipment_for_user(db: Client, tracking_id: str, user_id: str) -> dict | None:
+    shipment = get_shipment_by_tracking(db, tracking_id)
+    if shipment and str(shipment.get("user_id")) != str(user_id):
+        raise PermissionError("Shipment does not belong to the authenticated user")
+    return shipment
+
+
 def update_shipment(db: Client, shipment_id: str, fields: dict) -> dict:
     res = db.table("shipments").update(fields).eq("id", shipment_id).execute()
     if res and res.data and len(res.data) > 0:
@@ -237,6 +258,13 @@ def get_dispute(db: Client, dispute_id: str) -> dict:
     if res and res.data and len(res.data) > 0:
         return res.data[0]
     raise RuntimeError(f"Dispute {dispute_id} not found")
+
+
+def get_dispute_for_user(db: Client, dispute_id: str, user_id: str) -> dict:
+    dispute = get_dispute(db, dispute_id)
+    if str(dispute.get("user_id")) != str(user_id):
+        raise PermissionError("Dispute does not belong to the authenticated user")
+    return dispute
 
 
 def update_dispute(db: Client, dispute_id: str, fields: dict) -> dict:
@@ -302,6 +330,13 @@ def get_audit_event(db: Client, event_id: str) -> dict:
     if res and res.data and len(res.data) > 0:
         return res.data[0]
     raise RuntimeError(f"Audit event {event_id} not found")
+
+
+def get_audit_event_for_user(db: Client, event_id: str, user_id: str) -> dict:
+    event = get_audit_event(db, event_id)
+    if str(event.get("user_id")) != str(user_id):
+        raise PermissionError("Audit event does not belong to the authenticated user")
+    return event
 
 
 def check_audit_event_exists(

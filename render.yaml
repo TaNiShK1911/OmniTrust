@@ -95,5 +95,11 @@ services:
         value: https://omnitrust-api.onrender.com
       - key: VITE_PAYPAL_CLIENT_ID
         sync: false
+      # Needed at runtime by TanStack Start server functions to validate browser sessions.
+      # These are public Supabase values; service-role/JWT secrets never belong here.
+      - key: VITE_SUPABASE_URL
+        sync: false
+      - key: VITE_SUPABASE_ANON_KEY
+        sync: false
       - key: VITE_LOGISTICS_URL
         value: https://omnitrust-logistics.onrender.com

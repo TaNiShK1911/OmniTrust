@@ -59,14 +59,7 @@ export const requireSupabaseAuth = createMiddleware({ type: "function" }).server
     const authHeader = request.headers.get("authorization");
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return next({
-        context: {
-          supabase,
-          userId: "be72b3ca-7ab2-4c6d-bc13-ebdcd6a216d4",
-          claims: { sub: "be72b3ca-7ab2-4c6d-bc13-ebdcd6a216d4" },
-          token: process.env["SUPABASE_SERVICE_ROLE_KEY"] || process.env["SUPABASE_ANON_KEY"] || "",
-        },
-      });
+      throw new Error("Unauthorized: Bearer token required");
     }
 
     const token = authHeader.replace("Bearer ", "");
@@ -92,14 +85,13 @@ export const requireSupabaseAuth = createMiddleware({ type: "function" }).server
       },
     });
 
-    let userId = "be72b3ca-7ab2-4c6d-bc13-ebdcd6a216d4";
+    let userId: string;
     try {
       const { data, error } = await supabase.auth.getUser(token);
-      if (!error && data?.user?.id) {
-        userId = data.user.id;
-      }
+      if (error || !data?.user?.id) throw new Error("Invalid session");
+      userId = data.user.id;
     } catch {
-      // Fallback in dev
+      throw new Error("Unauthorized: Invalid session");
     }
 
     return next({

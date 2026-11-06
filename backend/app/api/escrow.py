@@ -86,7 +86,10 @@ def get_payment_status(order_id: str, db: DB, user: AuthUser):
     """
     Retrieve canonical payment state and authorization/capture references.
     """
-    status_data = payment_service.get_payment_status(db, order_id=order_id)
+    try:
+        status_data = payment_service.get_payment_status(db, order_id=order_id, user_id=user.user_id)
+    except PermissionError as exc:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail={"code": "FORBIDDEN", "message": str(exc)})
     return {"success": True, "data": status_data, "error": None}
 
 
@@ -111,6 +114,8 @@ async def capture_payment(order_id: str, db: DB, user: AuthUser):
         return {"success": True, "data": result, "error": None}
     except HTTPException:
         raise
+    except PermissionError as exc:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail={"code": "FORBIDDEN", "message": str(exc)})
     except Exception as exc:
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
@@ -128,6 +133,8 @@ async def void_payment(order_id: str, db: DB, user: AuthUser):
             db, order_id=order_id, user_id=user.user_id
         )
         return {"success": True, "data": result, "error": None}
+    except PermissionError as exc:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail={"code": "FORBIDDEN", "message": str(exc)})
     except Exception as exc:
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
@@ -155,5 +162,8 @@ async def create_escrow_compat(order_id: str, db: DB, user: AuthUser):
 @router.get("/{order_id}/escrow", deprecated=True)
 def get_escrow_compat(order_id: str, db: DB, user: AuthUser):
     """Deprecated compatibility route: returns payment status."""
-    result = payment_service.get_payment_status(db, order_id=order_id)
+    try:
+        result = payment_service.get_payment_status(db, order_id=order_id, user_id=user.user_id)
+    except PermissionError as exc:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail={"code": "FORBIDDEN", "message": str(exc)})
     return {"success": True, "data": result, "error": None}

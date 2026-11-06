@@ -22,14 +22,6 @@ def verify_supabase_jwt(token: str) -> dict[str, Any]:
     if not token:
         raise ValueError("No token provided")
 
-    # If the token matches the service role key or anon key, authenticate as admin/demo
-    if token == settings.supabase_service_role_key or token == settings.supabase_anon_key:
-        return {
-            "sub": "be72b3ca-7ab2-4c6d-bc13-ebdcd6a216d4",
-            "email": "demo@omnitrust.local",
-            "role": "authenticated",
-        }
-
     # 1. Try local HMAC verification if JWT secret is configured
     if settings.supabase_jwt_secret and not settings.supabase_jwt_secret.startswith("<"):
         try:
@@ -62,14 +54,6 @@ def verify_supabase_jwt(token: str) -> dict[str, Any]:
             }
     except Exception:
         pass
-
-    # 3. Fallback: decode unverified claims
-    try:
-        payload = jwt.get_unverified_claims(token)
-        if payload.get("sub"):
-            return payload
-    except Exception as exc:
-        raise ValueError(f"Invalid token: {exc}") from exc
 
     raise ValueError("Unable to verify token")
 
