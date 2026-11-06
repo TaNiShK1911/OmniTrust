@@ -28,6 +28,7 @@ celery_app.conf.update(
     task_time_limit=300,        # Hard timeout: 5 minutes
     task_soft_time_limit=240,   # Soft timeout: 4 minutes
     worker_prefetch_multiplier=1,
+    broker_connection_timeout=1.0,
     task_acks_late=True,        # Resilient to worker crashes
     broker_connection_retry_on_startup=True,
     task_default_queue="default",

@@ -13,16 +13,12 @@ import { authorizePayPalOrder, createPayPalOrder } from "@/lib/omni.functions";
 
 interface PayPalCheckoutProps {
   orderId: string;
-  amount: number;
-  currency?: string;
   onSuccess?: () => void;
   onError?: (msg: string) => void;
 }
 
 export function PayPalCheckout({
   orderId,
-  amount,
-  currency = "USD",
   onSuccess,
   onError,
 }: PayPalCheckoutProps) {
@@ -36,6 +32,11 @@ export function PayPalCheckout({
   const clientId =
     (import.meta as unknown as { env?: Record<string, string | undefined> }).env
       ?.VITE_PAYPAL_CLIENT_ID || "test";
+  // The backend is the source of truth for amount and settlement currency. This
+  // value only configures the PayPal SDK to match that server-side settlement.
+  const settlementCurrency =
+    (import.meta as unknown as { env?: Record<string, string | undefined> }).env
+      ?.VITE_PAYPAL_SETTLEMENT_CURRENCY || "USD";
 
   return (
     <div className="rounded-lg border border-border bg-card/60 p-4 shadow-sm backdrop-blur-sm">
@@ -71,7 +72,7 @@ export function PayPalCheckout({
         <PayPalScriptProvider
           options={{
             clientId: clientId,
-            currency: currency,
+            currency: settlementCurrency,
             intent: "authorize",
             components: "buttons",
           }}

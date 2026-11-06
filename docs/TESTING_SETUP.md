@@ -25,3 +25,10 @@ node .output/server/index.mjs
 
 Set `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` in the frontend runtime environment, plus the backend variables listed in `backend/README.md`. To demonstrate the full financial path, additionally configure `GROQ_API_KEY`, `PAYPAL_WEBHOOK_ID`, a PayPal Sandbox buyer account, and Redis.
 
+The local QA setup uses an explicit server-side INR-to-USD settlement configuration:
+set `PAYPAL_SETTLEMENT_CURRENCY=USD`, `PAYPAL_INR_TO_USD_RATE` to the reviewed QA
+rate, and `VITE_PAYPAL_SETTLEMENT_CURRENCY=USD`. Do not change a payment amount in
+the browser. The backend converts and records payment terms; the browser only receives
+the PayPal order ID. Replace the fixed QA rate with a reviewed FX policy before any
+production deployment.
+

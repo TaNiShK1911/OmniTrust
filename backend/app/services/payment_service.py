@@ -18,14 +18,27 @@ from uuid import uuid4
 
 from supabase import Client
 
+from app.config import get_settings
 from app.db import payment_queries, queries
 from app.integrations.paypal_client import PayPalClient, PayPalError, paypal_client
 from app.schemas.payments import PaymentState, format_money, validate_transition
 from app.services.audit_service import log_event
 from app.services.gatekeeper import run_settlement_checks
 from app.services.idempotency_service import provider_ref
+from app.services.payment_currency import SettlementTerms, settlement_terms
 
 logger = logging.getLogger("omnitrust.payment_service")
+
+
+def payment_terms_for_order(order: dict[str, Any]) -> SettlementTerms:
+    """Return the reviewed provider settlement amount for a source-currency order."""
+    settings = get_settings()
+    return settlement_terms(
+        source_amount=Decimal(str(order["total_amount"])),
+        source_currency=order.get("currency", "USD"),
+        settlement_currency=settings.paypal_settlement_currency,
+        inr_to_usd_rate=settings.paypal_inr_to_usd_rate,
+    )
 
 
 def get_payment_status(db: Client, *, order_id: str, user_id: str | None = None) -> dict[str, Any]:
@@ -38,6 +51,7 @@ def get_payment_status(db: Client, *, order_id: str, user_id: str | None = None)
     )
 
     if tx:
+        metadata = tx.get("metadata", {}) or {}
         return {
             "order_id": order_id,
             "transaction_id": tx.get("id"),
@@ -47,8 +61,11 @@ def get_payment_status(db: Client, *, order_id: str, user_id: str | None = None)
             "authorization_id": tx.get("authorization_id"),
             "capture_id": tx.get("capture_id"),
             "last_refund_id": tx.get("last_refund_id"),
-            "amount": str(tx.get("amount", order.get("total_amount", 0))),
+            "amount": format_money(Decimal(str(tx.get("amount", order.get("total_amount", 0))))),
             "currency": tx.get("currency", order.get("currency", "USD")),
+            "source_amount": metadata.get("source_amount", format_money(Decimal(str(order.get("total_amount", 0))))),
+            "source_currency": metadata.get("source_currency", order.get("currency", "USD")),
+            "conversion_rate": metadata.get("conversion_rate"),
             "authorization_expires_at": tx.get("authorization_expires_at"),
             "escrow_status": order.get("escrow_status"),
             "order_status": order.get("status"),
@@ -64,8 +81,11 @@ def get_payment_status(db: Client, *, order_id: str, user_id: str | None = None)
         "authorization_id": order.get("escrow_ref") if (order.get("escrow_ref", "") or "").startswith("AUTH-") else None,
         "capture_id": order.get("settlement_ref"),
         "last_refund_id": order.get("refund_ref"),
-        "amount": str(order.get("total_amount", 0)),
+        "amount": format_money(Decimal(str(order.get("total_amount", 0)))),
         "currency": order.get("currency", "USD"),
+        "source_amount": format_money(Decimal(str(order.get("total_amount", 0)))),
+        "source_currency": order.get("currency", "USD"),
+        "conversion_rate": None,
         "authorization_expires_at": None,
         "escrow_status": order.get("escrow_status", "none"),
         "order_status": order.get("status", "created"),
@@ -99,8 +119,9 @@ async def create_payment_order(
             "currency": existing_tx["currency"],
         }
 
-    amount = Decimal(str(order["total_amount"]))
-    currency = order.get("currency", "USD").upper()
+    terms = payment_terms_for_order(order)
+    amount = terms.settlement_amount
+    currency = terms.settlement_currency
     idem_key = order.get("idempotency_key") or provider_ref("pay_order")
     started = time.monotonic()
 
@@ -132,6 +153,11 @@ async def create_payment_order(
         "metadata": {
             "approval_url": approve_link,
             "links": links,
+            "source_amount": format_money(terms.source_amount),
+            "source_currency": terms.source_currency,
+            "settlement_amount": format_money(terms.settlement_amount),
+            "settlement_currency": terms.settlement_currency,
+            "conversion_rate": str(terms.conversion_rate) if terms.conversion_rate else None,
         },
     }
     tx = payment_queries.create_payment_transaction(db, tx_fields)
@@ -164,6 +190,9 @@ async def create_payment_order(
             "intent": "AUTHORIZE",
             "amount": format_money(amount),
             "currency": currency,
+            "source_amount": format_money(terms.source_amount),
+            "source_currency": terms.source_currency,
+            "conversion_rate": str(terms.conversion_rate) if terms.conversion_rate else None,
             "state": PaymentState.PENDING_APPROVAL.value,
         },
     )
@@ -175,6 +204,9 @@ async def create_payment_order(
         "state": PaymentState.PENDING_APPROVAL.value,
         "amount": format_money(amount),
         "currency": currency,
+        "source_amount": format_money(terms.source_amount),
+        "source_currency": terms.source_currency,
+        "conversion_rate": str(terms.conversion_rate) if terms.conversion_rate else None,
     }
 
 
@@ -555,9 +587,25 @@ async def refund_order(
     if not capture_id:
         raise ValueError(f"No capture ID found to refund for order {order_id}")
 
-    total_amount = Decimal(str(order["total_amount"]))
-    target_amount = refund_amount if refund_amount is not None else total_amount
-    is_partial = target_amount < total_amount
+    terms = payment_terms_for_order(order)
+    provider_total = Decimal(str(tx["amount"])) if tx else terms.settlement_amount
+    provider_currency = (tx.get("currency") if tx else terms.settlement_currency) or terms.settlement_currency
+    source_total = terms.source_amount
+    source_refund = refund_amount if refund_amount is not None else source_total
+    if source_refund <= 0 or source_refund > source_total:
+        raise ValueError("Refund amount must be greater than zero and cannot exceed the source order total")
+    if refund_amount is None:
+        target_amount = provider_total
+    elif terms.source_currency == provider_currency:
+        target_amount = source_refund
+    else:
+        target_amount = settlement_terms(
+            source_amount=source_refund,
+            source_currency=terms.source_currency,
+            settlement_currency=provider_currency,
+            inr_to_usd_rate=terms.conversion_rate,
+        ).settlement_amount
+    is_partial = source_refund < source_total
     next_state = PaymentState.PARTIALLY_REFUNDED if is_partial else PaymentState.REFUNDED
 
     if tx:
@@ -573,7 +621,7 @@ async def refund_order(
         capture_id=capture_id,
         request_id=ref_request_id,
         amount=target_amount,
-        currency=order.get("currency", "USD"),
+        currency=provider_currency,
         note_to_payer=note,
     )
 
@@ -598,7 +646,7 @@ async def refund_order(
             "status": "refunded",
             "escrow_status": "refunded",
             "refund_ref": refund_id,
-            "refund_amount": float(target_amount),
+            "refund_amount": float(source_refund),
         },
     )
 
@@ -617,7 +665,10 @@ async def refund_order(
         payload={
             "capture_id": capture_id,
             "refund_id": refund_id,
-            "amount": format_money(target_amount),
+            "source_amount": format_money(source_refund),
+            "source_currency": terms.source_currency,
+            "settlement_amount": format_money(target_amount),
+            "settlement_currency": provider_currency,
             "state": next_state.value,
         },
     )
@@ -626,6 +677,9 @@ async def refund_order(
         "ok": True,
         "order_id": order_id,
         "refund_id": refund_id,
-        "refund_amount": format_money(target_amount),
+        "refund_amount": format_money(source_refund),
+        "refund_currency": terms.source_currency,
+        "settlement_refund_amount": format_money(target_amount),
+        "settlement_currency": provider_currency,
         "state": next_state.value,
     }

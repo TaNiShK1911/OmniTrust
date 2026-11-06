@@ -2,7 +2,12 @@
 import { createMiddleware } from "@tanstack/react-start";
 import { getRequest } from "@tanstack/react-start/server";
 import { createClient } from "@supabase/supabase-js";
+import WebSocket from "ws";
 import type { Database } from "./types";
+
+if (typeof globalThis.WebSocket === "undefined") {
+  (globalThis as unknown as Record<string, unknown>).WebSocket = WebSocket;
+}
 
 function isNewSupabaseApiKey(value: string): boolean {
   return value.startsWith("sb_publishable_") || value.startsWith("sb_secret_");

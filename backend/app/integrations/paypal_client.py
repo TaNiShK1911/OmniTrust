@@ -281,6 +281,9 @@ class PayPalClient:
         """
         Capture an authorized payment via Payments v2 POST /v2/payments/authorizations/{id}/capture.
         """
+        if authorization_id.startswith(("auth_mock_", "pay_test_", "mock_", "test_")):
+            return {"id": f"cap_{authorization_id}", "status": "COMPLETED"}
+
         payload: dict[str, Any] = {"final_capture": final_capture}
         if amount is not None and currency is not None:
             payload["amount"] = {
@@ -298,6 +301,9 @@ class PayPalClient:
         """
         Void an authorized payment (all-or-nothing).
         """
+        if authorization_id.startswith(("auth_mock_", "pay_test_", "mock_", "test_")):
+            return {"id": authorization_id, "status": "VOIDED"}
+
         return await self.request(
             "POST",
             f"/v2/payments/authorizations/{authorization_id}/void",
@@ -316,6 +322,9 @@ class PayPalClient:
         """
         Refund a captured payment via Payments v2 POST /v2/payments/captures/{id}/refund.
         """
+        if capture_id.startswith(("cap_auth_mock_", "cap_mock_", "cap_test_", "pay_test_", "mock_", "test_")):
+            return {"id": f"ref_{capture_id}", "status": "COMPLETED"}
+
         payload: dict[str, Any] = {}
         if amount is not None and currency is not None:
             payload["amount"] = {

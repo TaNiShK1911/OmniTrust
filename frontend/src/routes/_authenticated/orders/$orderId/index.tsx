@@ -233,8 +233,6 @@ function OrderDetail() {
                   <div className="mb-2">
                     <PayPalCheckout
                       orderId={orderId}
-                      amount={Number(o.total_amount)}
-                      currency={o.currency || "USD"}
                       onSuccess={() => order.refetch()}
                     />
                   </div>

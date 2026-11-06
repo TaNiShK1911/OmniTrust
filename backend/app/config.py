@@ -5,6 +5,7 @@ All settings are loaded from environment variables (or .env file).
 Pydantic Settings validates types at startup so misconfiguration fails fast.
 """
 from functools import lru_cache
+from decimal import Decimal
 
 from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -41,6 +42,10 @@ class Settings(BaseSettings):
     paypal_webhook_id: str = ""
     paypal_return_url: str = "http://localhost:3000/paypal/return"
     paypal_cancel_url: str = "http://localhost:3000/paypal/cancel"
+    # PayPal merchant settlement configuration. Source order prices remain in
+    # their catalog currency; conversion is performed and recorded server-side.
+    paypal_settlement_currency: str = "USD"
+    paypal_inr_to_usd_rate: Decimal | None = None
 
     # ── Logistics ─────────────────────────────────────────────────────────────
     logistics_base_url: str = "http://localhost:5001"

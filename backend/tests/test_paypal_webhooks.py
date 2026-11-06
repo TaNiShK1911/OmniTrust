@@ -127,8 +127,9 @@ def client():
     })
 
     app.dependency_overrides[get_supabase_admin] = lambda: fake_db
-    with TestClient(app) as tc:
-        yield tc, fake_db
+    with patch("app.api.paypal_webhooks.paypal_client.verify_webhook_signature", new=AsyncMock(return_value=True)):
+        with TestClient(app) as tc:
+            yield tc, fake_db
     app.dependency_overrides.clear()
 
 

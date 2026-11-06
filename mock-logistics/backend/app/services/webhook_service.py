@@ -146,7 +146,7 @@ def _dispatch_webhook(db: Session, event: WebhookEvent):
         "X-Logistics-Signature": event.signature
     }
     body = event.payload.encode("utf-8")
-    timeout_sec = min(getattr(settings, "webhook_timeout_seconds", 5), 5)
+    timeout_sec = getattr(settings, "webhook_timeout_seconds", 15)
     max_retries = min(getattr(settings, "webhook_max_retries", 3), 3)
 
     delays = [0.5, 1.0]

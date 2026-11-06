@@ -123,6 +123,9 @@ export type PaymentStatus = {
   last_refund_id?: string | null;
   amount: string;
   currency: string;
+  source_amount?: string;
+  source_currency?: string;
+  conversion_rate?: string | null;
   authorization_expires_at?: string | null;
   escrow_status: string;
   order_status: string;
@@ -135,6 +138,9 @@ export type CreatePayPalOrderResult = {
   state: string;
   amount: string;
   currency: string;
+  source_amount?: string;
+  source_currency?: string;
+  conversion_rate?: string | null;
 };
 
 export type AuthorizePayPalOrderResult = {
